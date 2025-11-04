@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>AI Judicial Ecosystem - Judge's Dashboard</title>
+    <title>AI Judicial Ecosystem - Advocate's Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -13,10 +13,14 @@
         --foreground: 15 23 42; /* slate-900 */
         --card: 255 255 255; /* white */
         --card-foreground: 15 23 42; /* slate-900 */
-        --primary: 37 99 235; /* blue-600 */
+        --primary: 30 64 175; /* blue-800 */
         --primary-foreground: 248 250 252; /* slate-50 */
+        --secondary: 226 232 240; /* slate-200 */
+        --secondary-foreground: 30 41 59; /* slate-800 */
         --muted: 241 245 249; /* slate-100 */
         --muted-foreground: 100 116 139; /* slate-500 */
+        --accent: 37 99 235; /* blue-600 */
+        --accent-foreground: 255 255 255; /* white */
         --border: 226 232 240; /* slate-200 */
         --ring: 37 99 235; /* blue-600 */
       }
@@ -27,8 +31,12 @@
         --card-foreground: 248 250 252; /* slate-50 */
         --primary: 96 165 250; /* blue-400 */
         --primary-foreground: 15 23 42; /* slate-900 */
-        --muted: 30 41 59; /* slate-800 */
+        --secondary: 48 59 79; /* slate-700 */
+        --secondary-foreground: 226 232 240; /* slate-200 */
+        --muted: 48 59 79; /* slate-700 */
         --muted-foreground: 148 163 184; /* slate-400 */
+        --accent: 96 165 250; /* blue-400 */
+        --accent-foreground: 15 23 42; /* slate-900 */
         --border: 48 59 79; /* slate-700 */
         --ring: 96 165 250; /* blue-400 */
       }
@@ -36,7 +44,9 @@
         background-color: rgb(var(--background));
         color: rgb(var(--foreground));
         transition: background-color 0.3s, color 0.3s;
+        font-family: 'Inter', sans-serif;
       }
+      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
     </style>
   <script type="importmap">
 {

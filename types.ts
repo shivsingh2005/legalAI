@@ -83,3 +83,52 @@ export interface ChartData {
     borderWidth?: number;
   }[];
 }
+
+// Advocate: Types for Similar Case Analyzer
+export interface SimilarCase {
+  case_title: string;
+  citation_or_year: string;
+  court_name: string;
+  summary_of_decision: string;
+  relevance_score: number;
+  key_sections_cited: string[];
+  legal_takeaway: string;
+}
+
+export interface SimilarCaseAnalysisResult {
+  role: "Advocate";
+  feature: "Similar Case Analyzer";
+  case_context_summary: string;
+  similar_cases_found: SimilarCase[];
+  overall_summary: string;
+  suggested_action: string;
+}
+
+// Advocate: Types for Case Request Management
+export interface CaseRequest {
+    id: string;
+    userName: string;
+    caseSummary: string;
+    legalDomain: string;
+    urgency: 'Low' | 'Medium' | 'High';
+    status: 'Pending' | 'Accepted' | 'Rejected';
+    timestamp: string;
+}
+
+// Advocate: Types for AI Legal Research Pipeline
+export interface AIResearchPipelineResult {
+  pipeline_stage: "Complete";
+  case_context: string;
+  similar_cases: {
+    case_title: string;
+    court_name: string;
+    citation: string;
+    relevance_score: number;
+  }[];
+  rag_results: {
+    section: string;
+    summary: string;
+  }[];
+  final_summary: string;
+  argument_suggestion: string;
+}

@@ -1,5 +1,5 @@
 import { GoogleGenAI, Type, Chat } from "@google/genai";
-import type { RAGResult, PrecedentAnalysisResult, CitizenAnalysisResult } from '../types';
+import type { RAGResult, PrecedentAnalysisResult, CitizenAnalysisResult, SimilarCaseAnalysisResult, AIResearchPipelineResult } from '../types';
 
 const API_KEY = process.env.API_KEY;
 
@@ -43,6 +43,73 @@ const citizenAnalysisSchema = {
     required: ["case_classification", "legal_domain", "primary_issue", "legal_summary", "probable_remedy", "suggested_lawyer_type", "recommended_lawyers", "lawyer_request_summary", "urgency", "portal_recommendation"]
 };
 
+const similarCaseAnalyzerSchema = {
+    type: Type.OBJECT,
+    properties: {
+        role: { type: Type.STRING, description: "Should always be 'Advocate'." },
+        feature: { type: Type.STRING, description: "Should always be 'Similar Case Analyzer'." },
+        case_context_summary: { type: Type.STRING, description: "A brief summary of the user's provided case context." },
+        similar_cases_found: {
+            type: Type.ARRAY,
+            description: "A list of 3 relevant, concluded Indian court judgments.",
+            items: {
+                type: Type.OBJECT,
+                properties: {
+                    case_title: { type: Type.STRING, description: "The full title of the case (e.g., 'K. Bhaskaran v. Sankaran Vaidhyan Balan')." },
+                    citation_or_year: { type: Type.STRING, description: "The legal citation or year of the judgment (e.g., '1999 (7) SCC 510')." },
+                    court_name: { type: Type.STRING, description: "The court that delivered the judgment (e.g., 'Supreme Court of India')." },
+                    summary_of_decision: { type: Type.STRING, description: "A concise summary of the court's final decision or ruling." },
+                    relevance_score: { type: Type.NUMBER, description: "A numerical score from 0.0 to 1.0 indicating the relevance to the user's query." },
+                    key_sections_cited: { type: Type.ARRAY, items: { type: Type.STRING }, description: "List of key legal sections or acts cited in the judgment." },
+                    legal_takeaway: { type: Type.STRING, description: "The primary legal principle or takeaway from the judgment that is relevant to the advocate." }
+                },
+                required: ["case_title", "citation_or_year", "court_name", "summary_of_decision", "relevance_score", "key_sections_cited", "legal_takeaway"]
+            }
+        },
+        overall_summary: { type: Type.STRING, description: "A concluding summary of the findings." },
+        suggested_action: { type: Type.STRING, description: "A suggested next step for the advocate, like citing the cases." }
+    },
+    required: ["role", "feature", "case_context_summary", "similar_cases_found", "overall_summary", "suggested_action"]
+};
+
+const aiResearchPipelineSchema = {
+    type: Type.OBJECT,
+    properties: {
+        pipeline_stage: { type: Type.STRING, description: "Should be 'Complete'." },
+        case_context: { type: Type.STRING, description: "A one-sentence summary of the original case facts provided by the advocate." },
+        similar_cases: {
+            type: Type.ARRAY,
+            items: {
+                type: Type.OBJECT,
+                properties: {
+                    case_title: { type: Type.STRING },
+                    court_name: { type: Type.STRING },
+                    citation: { type: Type.STRING },
+                    relevance_score: { type: Type.NUMBER }
+                },
+                required: ["case_title", "court_name", "citation", "relevance_score"]
+            },
+            description: "A summarized list of the most relevant cases found in the previous pipeline stage."
+        },
+        rag_results: {
+            type: Type.ARRAY,
+            items: {
+                type: Type.OBJECT,
+                properties: {
+                    section: { type: Type.STRING },
+                    summary: { type: Type.STRING }
+                },
+                required: ["section", "summary"]
+            },
+            description: "A summarized list of relevant statutes or precedents from the RAG search."
+        },
+        final_summary: { type: Type.STRING, description: "A synthesized, expert legal summary combining insights from both similar cases and RAG results, explaining the legal standing of the case." },
+        argument_suggestion: { type: Type.STRING, description: "A concise, actionable suggestion for the primary legal argument the advocate should pursue." }
+    },
+    required: ["pipeline_stage", "case_context", "similar_cases", "rag_results", "final_summary", "argument_suggestion"]
+};
+
+
 export async function getCitizenCaseAnalysis(userInput: string): Promise<CitizenAnalysisResult> {
     const model = 'gemini-2.5-pro';
     const systemInstruction = `You are an advanced AI assistant integrated into an "AI-Driven Judicial Precedent & Case Management Ecosystem" built for India. Your module is specifically for the Citizen/User section. Your job is to analyze user queries, provide a detailed, India-specific legal case analysis, recommend lawyers, and generate a lawyer-hiring request summary. You must return a complete, structured JSON output. Always tailor your answers to Indian legal frameworks. Use accurate, verified references. Write in simple, professional, citizen-friendly English. The output must strictly follow the provided JSON schema. For the 'recommended_lawyers' field, you must generate realistic mock data for three lawyers.`;
@@ -67,6 +134,86 @@ export async function getCitizenCaseAnalysis(userInput: string): Promise<Citizen
         throw new Error("Failed to get a valid case analysis from the AI model.");
     }
 }
+
+export async function getSimilarCases(caseFacts: string): Promise<SimilarCaseAnalysisResult> {
+    const model = 'gemini-2.5-pro';
+    const systemInstruction = `You are an AI Legal Research Assistant for the Advocate Dashboard of an "AI-Driven Judicial Precedent & Case Management Ecosystem" in India. Your task is to analyze an advocate's case facts and return the most relevant, legally similar, concluded Indian court judgments. Understand the context, domain, and facts. Search conceptually for similar judgments, summarizing each one clearly. Output only real or plausible Indian judgments, focusing on landmark cases where possible. Your response must be professional, factual, and strictly follow the provided JSON schema.`;
+
+    const prompt = `Analyze the following case and return similar Indian judgments: "${caseFacts}"`;
+
+    try {
+        const response = await ai.models.generateContent({
+            model,
+            contents: prompt,
+            config: {
+                systemInstruction,
+                responseMimeType: "application/json",
+                responseSchema: similarCaseAnalyzerSchema,
+                temperature: 0.4,
+            },
+        });
+        const jsonText = response.text.trim();
+        return JSON.parse(jsonText) as SimilarCaseAnalysisResult;
+    } catch (error) {
+        console.error("Error in Gemini similar case analysis:", error);
+        throw new Error("Failed to find similar cases from the AI model.");
+    }
+}
+
+export async function getAIResearchSummary(
+  caseFacts: string, 
+  similarCasesResult: SimilarCaseAnalysisResult, 
+  ragResult: RAGResult
+): Promise<AIResearchPipelineResult> {
+    const model = 'gemini-2.5-pro';
+    const systemInstruction = `You are an expert AI Legal Analyst for an Indian law firm. You have received inputs from two different AI research modules and your job is to synthesize them into a final, consolidated legal research summary for a senior advocate. The summary must be sharp, legally precise, and actionable. Strictly adhere to the provided JSON schema.`;
+
+    const prompt = `
+      ADVOCATE'S ORIGINAL CASE FACTS:
+      ---
+      ${caseFacts}
+      ---
+      
+      STAGE 1 - SIMILAR CASE ANALYZER RESULTS:
+      ---
+      ${JSON.stringify(similarCasesResult.similar_cases_found, null, 2)}
+      ---
+      
+      STAGE 2 - RAG PRECEDENT SEARCH RESULTS:
+      ---
+      ${JSON.stringify(ragResult, null, 2)}
+      ---
+      
+      TASK:
+      Based on all the provided information, generate a final, consolidated AI Legal Research Summary.
+      1. Briefly summarize the advocate's original case context.
+      2. Extract and list the most critical similar cases, simplifying the data.
+      3. Extract and list the most relevant legal sections from the RAG results.
+      4. Write a 'final_summary' that connects the precedents and statutes to the advocate's case facts, providing a clear legal outlook.
+      5. Provide a sharp, one-sentence 'argument_suggestion' that the advocate can use as a starting point.
+      
+      Your output must be a valid JSON object matching the required schema.
+    `;
+
+    try {
+        const response = await ai.models.generateContent({
+            model,
+            contents: prompt,
+            config: {
+                systemInstruction,
+                responseMimeType: "application/json",
+                responseSchema: aiResearchPipelineSchema,
+                temperature: 0.5,
+            },
+        });
+        const jsonText = response.text.trim();
+        return JSON.parse(jsonText) as AIResearchPipelineResult;
+    } catch (error) {
+        console.error("Error in Gemini research summary generation:", error);
+        throw new Error("Failed to generate the final AI research summary.");
+    }
+}
+
 
 // Schema for Advocate RAG search
 const ragSchema = {
@@ -160,12 +307,14 @@ export async function performRAGSearch(query: string, context: string): Promise<
     });
     const jsonText = response.text.trim();
     if (!jsonText) {
-      throw new Error("Received an empty response from the AI model.");
+      // For this specific use case, return a default value instead of throwing an error
+      return { answer: "No specific precedents found in the provided context for the query.", citations: ["The RAG model could not extract direct citations based on the input."] };
     }
     return JSON.parse(jsonText) as RAGResult;
   } catch (error) {
     console.error("Error in Gemini RAG search:", error);
-    throw new Error("Failed to get a valid RAG analysis from the AI model.");
+    // For this specific use case, return a default value instead of throwing an error
+    return { answer: "An error occurred during the RAG search.", citations: ["The model failed to produce a valid response."] };
   }
 }
 
