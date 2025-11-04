@@ -68,9 +68,7 @@ const StatuteFrequencyChart: React.FC = () => {
         datasets: [{
             label: 'Citations in Past 100 Cases',
             data: [82, 65, 41, 35, 19],
-            // FIX: Type 'string' is not assignable to type 'string[]'. Wrapped value in an array.
             backgroundColor: ['rgba(75, 192, 192, 0.7)'],
-            // FIX: Type 'string' is not assignable to type 'string[]'. Wrapped value in an array.
             borderColor: ['rgba(75, 192, 192, 1)'],
             borderWidth: 1
         }]
@@ -110,12 +108,12 @@ const StatuteFrequencyChart: React.FC = () => {
 export const JudicialAnalyticsDashboard: React.FC = () => {
   return (
     <div>
-      <h1 className="text-3xl font-bold text-gray-800 mb-6">Judicial Analytics Dashboard</h1>
+      <h1 className="text-3xl font-bold text-[rgb(var(--foreground))] mb-6">Judicial Analytics Dashboard</h1>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <div className="bg-white p-6 rounded-lg shadow-md">
+        <div className="bg-[rgb(var(--card))] p-6 rounded-lg shadow-md">
             <RulingDistributionChart />
         </div>
-        <div className="bg-white p-6 rounded-lg shadow-md">
+        <div className="bg-[rgb(var(--card))] p-6 rounded-lg shadow-md">
             <StatuteFrequencyChart />
         </div>
       </div>

@@ -7,6 +7,37 @@
     <title>AI Judicial Ecosystem - Judge's Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+      :root {
+        --background: 248 250 252; /* slate-50 */
+        --foreground: 15 23 42; /* slate-900 */
+        --card: 255 255 255; /* white */
+        --card-foreground: 15 23 42; /* slate-900 */
+        --primary: 37 99 235; /* blue-600 */
+        --primary-foreground: 248 250 252; /* slate-50 */
+        --muted: 241 245 249; /* slate-100 */
+        --muted-foreground: 100 116 139; /* slate-500 */
+        --border: 226 232 240; /* slate-200 */
+        --ring: 37 99 235; /* blue-600 */
+      }
+      [data-theme="dark"] {
+        --background: 15 23 42; /* slate-900 */
+        --foreground: 248 250 252; /* slate-50 */
+        --card: 30 41 59; /* slate-800 */
+        --card-foreground: 248 250 252; /* slate-50 */
+        --primary: 96 165 250; /* blue-400 */
+        --primary-foreground: 15 23 42; /* slate-900 */
+        --muted: 30 41 59; /* slate-800 */
+        --muted-foreground: 148 163 184; /* slate-400 */
+        --border: 48 59 79; /* slate-700 */
+        --ring: 96 165 250; /* blue-400 */
+      }
+      body {
+        background-color: rgb(var(--background));
+        color: rgb(var(--foreground));
+        transition: background-color 0.3s, color 0.3s;
+      }
+    </style>
   <script type="importmap">
 {
   "imports": {

@@ -54,87 +54,87 @@ export const ExplainableAI: React.FC = () => {
   }, [documentText]);
 
   return (
-    <div className="bg-white p-6 rounded-lg shadow-md h-full flex flex-col">
-      <h2 className="text-xl font-semibold mb-4 text-gray-700">Explainable AI: Precedent Analysis</h2>
+    <div className="bg-[rgb(var(--card))] p-6 rounded-lg shadow-md h-full flex flex-col">
+      <h2 className="text-xl font-semibold mb-4 text-[rgb(var(--card-foreground))]">Explainable AI: Precedent Analysis</h2>
       
-      {/* Upload Section */}
-      <div className="flex-shrink-0">
-        <label className="flex flex-col items-center justify-center w-full h-24 px-4 transition bg-white border-2 border-gray-300 border-dashed rounded-md appearance-none cursor-pointer hover:border-gray-400">
-          {fileName ? (
-            <div className="text-center">
-              <FileTextIcon className="mx-auto h-7 w-7 text-green-500" />
-              <span className="mt-1 block text-sm font-medium text-gray-900">{fileName}</span>
-            </div>
-          ) : (
-            <div className="text-center">
-              <UploadIcon className="mx-auto h-7 w-7 text-gray-400" />
-              <span className="mt-1 block text-sm font-medium text-gray-600">Upload Case Document (.txt)</span>
-            </div>
-          )}
-          <input type="file" className="hidden" onChange={handleFileChange} accept=".txt" disabled={isLoading} />
-        </label>
-        <button
-          onClick={handleAnalyze}
-          disabled={isLoading || !documentText}
-          className="mt-4 w-full px-6 py-3 bg-indigo-600 text-white font-semibold rounded-md hover:bg-indigo-700 disabled:bg-gray-400 flex items-center justify-center gap-2"
-        >
-          {isLoading ? <><Spinner /> Analyzing...</> : <><GavelIcon className="w-5 h-5" /> Analyze Precedents</>}
-        </button>
+      <div className="flex-shrink-0 border-b border-[rgb(var(--border))] pb-4 mb-4">
+        <div className="grid sm:grid-cols-2 gap-4 items-center">
+            <label className="flex flex-col items-center justify-center w-full h-24 px-4 transition bg-[rgb(var(--background))] border-2 border-[rgb(var(--border))] border-dashed rounded-md appearance-none cursor-pointer hover:border-[rgb(var(--primary))]">
+              {fileName ? (
+                <div className="text-center">
+                  <FileTextIcon className="mx-auto h-7 w-7 text-green-500" />
+                  <span className="mt-1 block text-sm font-medium text-[rgb(var(--foreground))]">{fileName}</span>
+                </div>
+              ) : (
+                <div className="text-center">
+                  <UploadIcon className="mx-auto h-7 w-7 text-[rgb(var(--muted-foreground))]" />
+                  <span className="mt-1 block text-sm font-medium text-[rgb(var(--muted-foreground))]">Upload Case Document (.txt)</span>
+                </div>
+              )}
+              <input type="file" className="hidden" onChange={handleFileChange} accept=".txt" disabled={isLoading} />
+            </label>
+            <button
+              onClick={handleAnalyze}
+              disabled={isLoading || !documentText}
+              className="w-full h-24 px-6 py-3 bg-[rgb(var(--primary))] text-[rgb(var(--primary-foreground))] font-semibold rounded-md hover:opacity-90 disabled:bg-slate-400 dark:disabled:bg-slate-600 disabled:cursor-not-allowed flex items-center justify-center gap-2 transition-opacity"
+            >
+              {isLoading ? <><Spinner /> Analyzing...</> : <><GavelIcon className="w-5 h-5" /> Analyze Precedents</>}
+            </button>
+        </div>
       </div>
 
-      {/* Results Section */}
-      <div className="flex-grow mt-4 overflow-y-auto">
+      <div className="flex-grow mt-4 overflow-y-auto pr-2">
         {isLoading && (
           <div className="flex items-center justify-center h-full">
             <div className="text-center">
               <Spinner />
-              <p className="mt-2 text-gray-600">AI is performing deep analysis...</p>
+              <p className="mt-2 text-[rgb(var(--muted-foreground))]">AI is performing deep analysis...</p>
             </div>
           </div>
         )}
         {error && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg" role="alert">
+          <div className="bg-red-500/10 border border-red-500/20 text-red-500 px-4 py-3 rounded-lg" role="alert">
             <p><strong className="font-bold">Error: </strong>{error}</p>
           </div>
         )}
         {result && (
           <div className="space-y-6">
-            <div>
-              <h3 className="text-lg font-bold text-gray-800 border-b pb-1 mb-2">Key Arguments</h3>
+            <div className="bg-[rgb(var(--background))] p-4 rounded-lg">
+              <h3 className="text-lg font-bold text-[rgb(var(--foreground))] border-b border-[rgb(var(--border))] pb-2 mb-3">Key Arguments</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                <div className="bg-blue-50 p-3 rounded-lg"><strong className="text-blue-800">Plaintiff:</strong> {result.keyArguments.plaintiff}</div>
-                <div className="bg-green-50 p-3 rounded-lg"><strong className="text-green-800">Defendant:</strong> {result.keyArguments.defendant}</div>
+                <div><strong className="text-blue-500 dark:text-blue-400 block mb-1">Plaintiff:</strong> <p className="text-[rgb(var(--foreground))]">{result.keyArguments.plaintiff}</p></div>
+                <div><strong className="text-green-500 dark:text-green-400 block mb-1">Defendant:</strong> <p className="text-[rgb(var(--foreground))]">{result.keyArguments.defendant}</p></div>
               </div>
             </div>
             
-            <div>
-              <h3 className="text-lg font-bold text-gray-800 border-b pb-1 mb-2">Influencing Statutes & Precedents</h3>
+            <div className="bg-[rgb(var(--background))] p-4 rounded-lg">
+              <h3 className="text-lg font-bold text-[rgb(var(--foreground))] border-b border-[rgb(var(--border))] pb-2 mb-3">Influencing Statutes & Precedents</h3>
               <div className="space-y-3">
                 {result.influencingStatutes.map((item, index) => (
-                  <div key={index} className="bg-gray-50 p-3 rounded-lg">
-                    <p className="font-semibold text-gray-700">{item.statute}</p>
-                    <blockquote className="border-l-4 border-indigo-400 pl-3 my-1 text-sm text-gray-600 italic">"{item.quote}"</blockquote>
-                    <p className="text-xs text-gray-800"><strong className="font-medium">Relevance:</strong> {item.relevance}</p>
+                  <div key={index} className="bg-[rgb(var(--card))] p-3 rounded-md border border-[rgb(var(--border))]">
+                    <p className="font-semibold text-[rgb(var(--foreground))]">{item.statute}</p>
+                    <blockquote className="border-l-4 border-indigo-500/50 pl-3 my-1 text-sm text-[rgb(var(--muted-foreground))] italic">"{item.quote}"</blockquote>
+                    <p className="text-xs text-[rgb(var(--foreground))]"><strong className="font-medium">Relevance:</strong> {item.relevance}</p>
                   </div>
                 ))}
               </div>
             </div>
 
-            <div>
-              <h3 className="text-lg font-bold text-gray-800 border-b pb-1 mb-2">Legal Consistency Check</h3>
+            <div className="bg-[rgb(var(--background))] p-4 rounded-lg">
+              <h3 className="text-lg font-bold text-[rgb(var(--foreground))] border-b border-[rgb(var(--border))] pb-2 mb-3">Legal Consistency Check</h3>
                {result.consistencyCheck.length > 0 ? (
                     result.consistencyCheck.map((item, index) => (
-                        <div key={index} className="bg-yellow-50 border border-yellow-200 p-3 rounded-lg text-sm mb-2">
-                            <p className="font-semibold text-yellow-800">Issue: {item.issue}</p>
-                            <p className="text-yellow-700">{item.explanation}</p>
+                        <div key={index} className="bg-amber-500/10 border border-amber-500/20 p-3 rounded-lg text-sm mb-2">
+                            <p className="font-semibold text-amber-600 dark:text-amber-400">Issue: {item.issue}</p>
+                            <p className="text-amber-700 dark:text-amber-300">{item.explanation}</p>
                         </div>
                     ))
-                ) : <p className="text-sm text-gray-600">No major logical inconsistencies detected.</p>}
+                ) : <p className="text-sm text-green-600 dark:text-green-400 bg-green-500/10 p-3 rounded-lg">No major logical inconsistencies detected.</p>}
             </div>
 
-             <div>
-              <h3 className="text-lg font-bold text-gray-800 border-b pb-1 mb-2">Bias Detection</h3>
-              <div className={`p-3 rounded-lg text-sm ${result.biasDetection.warning.includes('No potential bias') ? 'bg-gray-100' : 'bg-red-100 border border-red-200'}`}>
+             <div className="bg-[rgb(var(--background))] p-4 rounded-lg">
+              <h3 className="text-lg font-bold text-[rgb(var(--foreground))] border-b border-[rgb(var(--border))] pb-2 mb-3">Bias Detection</h3>
+              <div className={`p-3 rounded-lg text-sm ${result.biasDetection.warning.includes('No potential bias') ? 'bg-green-500/10 text-green-700 dark:text-green-300' : 'bg-red-500/10 text-red-700 dark:text-red-300 border border-red-500/20'}`}>
                 <p>{result.biasDetection.warning}</p>
               </div>
             </div>

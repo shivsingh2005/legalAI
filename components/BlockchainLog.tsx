@@ -10,21 +10,21 @@ export const BlockchainLog: React.FC = () => {
         { block: 893401, hash: '0x5d0a...337a', event: 'CASE_CREATED' },
     ];
   return (
-    <div className="bg-white p-6 rounded-lg shadow-md">
-      <h2 className="text-xl font-semibold mb-4 text-gray-700 flex items-center">
-        <CubeTransparentIcon className="w-6 h-6 mr-2 text-blue-600" />
+    <div className="bg-[rgb(var(--card))] p-6 rounded-lg shadow-md">
+      <h2 className="text-xl font-semibold mb-4 text-[rgb(var(--card-foreground))] flex items-center">
+        <CubeTransparentIcon className="w-6 h-6 mr-2 text-blue-500 dark:text-blue-400" />
         Blockchain Case Log
       </h2>
-      <div className="space-y-2 text-sm font-mono">
+      <div className="space-y-2 text-sm font-mono max-h-48 overflow-y-auto">
         {logItems.map(item => (
-            <div key={item.block} className="p-2 bg-gray-50 rounded-md hover:bg-gray-100">
-                <p className="text-gray-500">Block: <span className="text-black">{item.block}</span></p>
-                <p className="truncate text-gray-500">Hash: <span className="text-blue-700">{item.hash}</span></p>
-                <p className="text-gray-500">Event: <span className="font-sans font-semibold text-gray-800 bg-gray-200 px-2 py-0.5 rounded">{item.event}</span></p>
+            <div key={item.block} className="p-2 bg-[rgb(var(--background))] rounded-md hover:bg-[rgb(var(--muted))]">
+                <p className="text-[rgb(var(--muted-foreground))]">Block: <span className="text-[rgb(var(--foreground))]">{item.block}</span></p>
+                <p className="truncate text-[rgb(var(--muted-foreground))]">Hash: <span className="text-blue-600 dark:text-blue-400">{item.hash}</span></p>
+                <p className="text-[rgb(var(--muted-foreground))]">Event: <span className="font-sans font-semibold text-[rgb(var(--foreground))] bg-[rgb(var(--border))] px-2 py-0.5 rounded">{item.event}</span></p>
             </div>
         ))}
       </div>
-      <p className="text-xs text-gray-400 mt-4 text-center">Simulated immutable log of case events.</p>
+      <p className="text-xs text-[rgb(var(--muted-foreground))] mt-4 text-center">Simulated immutable log of case events.</p>
     </div>
   );
 };

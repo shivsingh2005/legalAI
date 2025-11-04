@@ -11,22 +11,22 @@ export const LiveCaseFeed: React.FC = () => {
   ];
 
   return (
-    <div className="bg-white p-6 rounded-lg shadow-md">
-      <h2 className="text-xl font-semibold mb-4 text-gray-700 flex items-center">
+    <div className="bg-[rgb(var(--card))] p-6 rounded-lg shadow-md">
+      <h2 className="text-xl font-semibold mb-4 text-[rgb(var(--card-foreground))] flex items-center">
         <SignalIcon className="w-6 h-6 mr-2 text-red-500 animate-pulse" />
-        Live Case Feed (MQTT)
+        Live Case Feed
       </h2>
-      <div className="space-y-3 text-sm">
+      <div className="space-y-3 text-sm max-h-48 overflow-y-auto">
         {feedItems.map((item, index) => (
           <div key={index} className="flex items-start">
-            <span className="font-mono text-gray-500 mr-3">{item.time}</span>
-            <p className="text-gray-800">
+            <span className="font-mono text-[rgb(var(--muted-foreground))] mr-3">{item.time}</span>
+            <p className="text-[rgb(var(--foreground))]">
               <span className="font-semibold">{item.case}:</span> {item.event}
             </p>
           </div>
         ))}
       </div>
-       <p className="text-xs text-gray-400 mt-4 text-center">This is a simulated feed representing live court updates.</p>
+       <p className="text-xs text-[rgb(var(--muted-foreground))] mt-4 text-center">This is a simulated feed representing live court updates via MQTT.</p>
     </div>
   );
 };

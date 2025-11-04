@@ -6,7 +6,7 @@ import { BlockchainLog } from './BlockchainLog';
 export const JudgeDashboard: React.FC = () => {
   return (
     <div>
-        <h1 className="text-3xl font-bold text-gray-800 mb-6">Judge's AI-Powered Dashboard</h1>
+        <h1 className="text-3xl font-bold text-[rgb(var(--foreground))] mb-6">Judge's AI-Powered Dashboard</h1>
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
             {/* Main Content: Explainable AI */}
             <div className="xl:col-span-2">
