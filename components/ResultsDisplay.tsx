@@ -1,26 +1,54 @@
-
-import React, { useState } from 'react';
-import type { AnalysisResult } from '../types';
-import { LawyerCard } from './LawyerCard';
+import React from 'react';
+import type { CitizenAnalysisResult, RecommendedLawyer } from '../types';
 import { Spinner } from './Spinner';
+import { RecommendedLawyerCard } from './RecommendedLawyerCard';
+import { CheckCircleIcon } from './icons/CheckCircleIcon';
+import { ExclamationTriangleIcon } from './icons/ExclamationTriangleIcon';
+import { InformationCircleIcon } from './icons/InformationCircleIcon';
+import { GlobeAltIcon } from './icons/GlobeAltIcon';
 
 interface ResultsDisplayProps {
-  result: AnalysisResult | null;
+  result: CitizenAnalysisResult | null;
   isLoading: boolean;
   error: string | null;
+  onSendRequest: (lawyer: RecommendedLawyer, summary: string) => void;
 }
 
-type ActiveTab = 'summary' | 'lawyers' | 'petition';
+const InfoCard: React.FC<{ title: string; value: string; urgency?: string }> = ({ title, value, urgency }) => {
+  const getUrgencyStyles = () => {
+    if (!urgency) return { icon: null, color: 'text-[rgb(var(--foreground))]', };
+    switch (urgency.toLowerCase()) {
+      case 'high':
+        return { icon: <ExclamationTriangleIcon className="w-5 h-5 mr-1.5" />, color: 'text-red-500' };
+      case 'medium':
+        return { icon: <ExclamationTriangleIcon className="w-5 h-5 mr-1.5" />, color: 'text-amber-500' };
+      case 'low':
+        return { icon: <InformationCircleIcon className="w-5 h-5 mr-1.5" />, color: 'text-blue-500' };
+      default:
+        return { icon: null, color: 'text-[rgb(var(--foreground))]' };
+    }
+  };
+  const { icon, color } = getUrgencyStyles();
+  
+  return (
+      <div className="bg-[rgb(var(--muted))] p-4 rounded-lg">
+          <h4 className="text-sm font-semibold text-[rgb(var(--muted-foreground))]">{title}</h4>
+          <p className={`text-base font-bold flex items-center mt-1 ${color}`}>
+            {icon}
+            {value}
+          </p>
+      </div>
+  );
+};
 
-export const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ result, isLoading, error }) => {
-  const [activeTab, setActiveTab] = useState<ActiveTab>('summary');
 
+export const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ result, isLoading, error, onSendRequest }) => {
   if (isLoading) {
     return (
-      <div className="bg-white p-6 rounded-lg shadow-lg text-center">
+      <div className="bg-[rgb(var(--card))] p-6 rounded-lg shadow-lg text-center">
         <div className="flex justify-center items-center gap-4">
           <Spinner />
-          <p className="text-lg text-gray-600">AI is analyzing your case. This may take a moment...</p>
+          <p className="text-lg text-[rgb(var(--muted-foreground))]">AI is analyzing your case. This may take a moment...</p>
         </div>
       </div>
     );
@@ -28,7 +56,7 @@ export const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ result, isLoadin
 
   if (error) {
     return (
-      <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg shadow-lg" role="alert">
+      <div className="bg-red-500/10 border border-red-500/20 text-red-500 px-4 py-3 rounded-lg shadow-lg" role="alert">
         <strong className="font-bold">Error: </strong>
         <span className="block sm:inline">{error}</span>
       </div>
@@ -38,79 +66,59 @@ export const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ result, isLoadin
   if (!result) {
     return null;
   }
-
-  const renderTabContent = () => {
-    switch (activeTab) {
-      case 'summary':
-        return (
-          <div>
-            <h3 className="text-xl font-semibold mb-2 text-gray-700">Legal Summary</h3>
-            <p className="text-gray-600 whitespace-pre-wrap">{result.legalSummary}</p>
-          </div>
-        );
-      case 'lawyers':
-        return (
-          <div>
-            <h3 className="text-xl font-semibold mb-2 text-gray-700">Lawyer Recommendations</h3>
-            <p className="text-sm text-gray-500 mb-4">
-              Disclaimer: These are AI-generated, hypothetical lawyer profiles for illustrative purposes only.
-            </p>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {result.lawyerRecommendations.map((lawyer, index) => (
-                <LawyerCard key={index} lawyer={lawyer} />
-              ))}
-            </div>
-          </div>
-        );
-      case 'petition':
-        return (
-          <div>
-            <div className="flex justify-between items-center mb-2">
-                <h3 className="text-xl font-semibold text-gray-700">AI-Generated Petition Draft</h3>
-                <button 
-                    onClick={() => navigator.clipboard.writeText(result.petitionDraft)}
-                    className="px-3 py-1 text-sm bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition"
-                >
-                    Copy Text
-                </button>
-            </div>
-            <pre className="bg-gray-100 p-4 rounded-md text-sm text-gray-800 whitespace-pre-wrap overflow-x-auto font-mono">
-              {result.petitionDraft}
-            </pre>
-          </div>
-        );
-      default:
-        return null;
-    }
-  };
-
-  const TabButton:React.FC<{tabName: ActiveTab, label: string}> = ({tabName, label}) => (
-    <button
-        onClick={() => setActiveTab(tabName)}
-        className={`px-4 py-2 font-medium rounded-t-lg transition-colors text-sm sm:text-base ${activeTab === tabName ? 'bg-white text-blue-600 border-b-2 border-blue-600' : 'bg-transparent text-gray-500 hover:text-blue-600'}`}
-    >
-        {label}
-    </button>
-  );
-
+  
   return (
-    <div className="bg-white p-6 rounded-lg shadow-lg">
-      <div className="mb-4">
-        <h2 className="text-2xl font-bold text-gray-800">Case Analysis Report</h2>
-        <div className="mt-1 text-lg bg-blue-100 text-blue-800 px-3 py-1 rounded-full inline-block">
-          <strong>Case Classification:</strong> {result.caseClassification}
+    <div className="bg-[rgb(var(--card))] p-6 rounded-lg shadow-lg">
+      <h2 className="text-2xl font-bold text-[rgb(var(--card-foreground))] mb-4">Case Analysis & Recommendations</h2>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <InfoCard title="Case Classification" value={result.case_classification} />
+        <InfoCard title="Urgency Level" value={result.urgency} urgency={result.urgency} />
+        <InfoCard title="Legal Domain" value={result.legal_domain} />
+        <InfoCard title="Primary Issue" value={result.primary_issue} />
+      </div>
+
+      <div className="mt-6 border-t border-[rgb(var(--border))] pt-6">
+        <h3 className="text-lg font-semibold text-[rgb(var(--card-foreground))] mb-2">Legal Summary</h3>
+        <p className="text-[rgb(var(--foreground))] bg-[rgb(var(--muted))] p-4 rounded-md">{result.legal_summary}</p>
+      </div>
+
+      <div className="mt-6">
+        <h3 className="text-lg font-semibold text-[rgb(var(--card-foreground))] mb-2 flex items-center">
+            <CheckCircleIcon className="w-5 h-5 mr-2 text-green-500" />
+            Probable Remedy / Next Steps
+        </h3>
+        <div className="text-[rgb(var(--foreground))] bg-green-500/10 border-l-4 border-green-500 p-4 rounded-r-md">
+            {result.probable_remedy}
+        </div>
+      </div>
+      
+      {result.portal_recommendation && result.portal_recommendation.toLowerCase() !== 'n/a' && (
+          <div className="mt-6">
+              <h3 className="text-lg font-semibold text-[rgb(var(--card-foreground))] mb-2 flex items-center">
+                  <GlobeAltIcon className="w-5 h-5 mr-2 text-blue-500" />
+                  Relevant Portal / Authority
+              </h3>
+              <div className="text-[rgb(var(--foreground))] bg-blue-500/10 p-4 rounded-md">
+                  {result.portal_recommendation}
+              </div>
+          </div>
+      )}
+      
+      <div className="mt-6 border-t border-[rgb(var(--border))] pt-6">
+        <h3 className="text-lg font-semibold text-[rgb(var(--card-foreground))] mb-1">Top 3 Recommended Lawyers</h3>
+        <p className="text-sm text-[rgb(var(--muted-foreground))] mb-4">Based on your case, we suggest consulting a <strong>{result.suggested_lawyer_type}</strong>. Here are some recommendations:</p>
+        <div className="space-y-4">
+            {result.recommended_lawyers.map((lawyer) => (
+                <RecommendedLawyerCard 
+                    key={lawyer.profile_id} 
+                    lawyer={lawyer} 
+                    onRequest={(selectedLawyer) => onSendRequest(selectedLawyer, result.lawyer_request_summary)}
+                />
+            ))}
         </div>
       </div>
 
-      <div className="border-b border-gray-200 mb-4 bg-gray-50 rounded-t-lg">
-        <nav className="flex -mb-px">
-          <TabButton tabName='summary' label='Simple Summary' />
-          <TabButton tabName='lawyers' label='Find a Lawyer' />
-          <TabButton tabName='petition' label='Petition Draft' />
-        </nav>
-      </div>
-      
-      <div className="mt-4">{renderTabContent()}</div>
     </div>
   );
 };
