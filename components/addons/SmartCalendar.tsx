@@ -1,5 +1,6 @@
 import React from 'react';
 import { CalendarIcon } from '../icons/CalendarIcon';
+import { useTranslations } from '../../hooks/useTranslations';
 
 // Mock data for calendar events
 const events = [
@@ -26,21 +27,22 @@ const CalendarDay: React.FC<{ day: number; event?: { title: string } }> = ({ day
 };
 
 export const SmartCalendar: React.FC = () => {
+    const t = useTranslations();
     const daysInMonth = Array.from({ length: 31 }, (_, i) => i + 1);
   return (
     <div>
       <h1 className="text-2xl font-bold text-[rgb(var(--foreground))] mb-4 flex items-center gap-2">
-        <CalendarIcon className="w-6 h-6" /> Smart Legal Calendar
+        <CalendarIcon className="w-6 h-6" /> {t.smartCalendar.title}
       </h1>
       <div className="bg-[rgb(var(--card))] p-6 rounded-lg shadow-md border border-[rgb(var(--border))]">
         <div className="flex justify-between items-center mb-4">
-            <h2 className="text-lg font-semibold">August 2024</h2>
+            <h2 className="text-lg font-semibold">{t.smartCalendar.month}</h2>
             <div className="text-sm text-[rgb(var(--muted-foreground))]">
-                (UI Placeholder)
+                {t.smartCalendar.placeholder}
             </div>
         </div>
         <div className="grid grid-cols-7 gap-px bg-[rgb(var(--border))] border border-[rgb(var(--border))]">
-            {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
+            {t.smartCalendar.days.map((day: string) => (
                 <div key={day} className="text-center text-xs font-bold py-2 bg-[rgb(var(--muted))] text-[rgb(var(--muted-foreground))]">{day}</div>
             ))}
             {daysInMonth.map(day => {
@@ -49,7 +51,7 @@ export const SmartCalendar: React.FC = () => {
             })}
         </div>
         <p className="text-center text-sm text-[rgb(var(--muted-foreground))] mt-4">
-            This is a demonstration of the Smart Calendar module. In a future version, it will be populated with AI-suggested deadlines and important dates.
+            {t.smartCalendar.description}
         </p>
       </div>
     </div>

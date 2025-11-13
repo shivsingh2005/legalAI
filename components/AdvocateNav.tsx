@@ -8,29 +8,30 @@ import { UsersIcon } from './icons/UsersIcon';
 import { FeatherIcon } from './icons/FeatherIcon';
 import { CalendarIcon } from './icons/CalendarIcon';
 import { FEATURE_FLAGS } from '../featureFlags';
+import { useTranslations } from '../hooks/useTranslations';
 
 interface AdvocateNavProps {
   activeView: AdvocateView;
   setActiveView: (view: AdvocateView) => void;
 }
 
-const navItems = [
-  { id: 'caserequests', label: 'Case Requests', icon: MailIcon, flag: true },
-  { id: 'airesearch', label: 'AI Legal Research Hub', icon: FlaskConicalIcon, flag: true },
-  { id: 'aidrafts', label: 'AI Legal Drafts', icon: FeatherIcon, flag: FEATURE_FLAGS.aiDraftGenerator },
-  { id: 'similarcases', label: 'Similar Case Analyzer', icon: FileClockIcon, flag: true },
-  { id: 'precedentsearch', label: 'Precedent Search', icon: SearchIcon, flag: true },
-  { id: 'argumentbuilder', label: 'Argument Builder', icon: UsersIcon, flag: true },
-  { id: 'calendar', label: 'Smart Calendar', icon: CalendarIcon, flag: FEATURE_FLAGS.smartCalendar },
-];
-
 export const AdvocateNav: React.FC<AdvocateNavProps> = ({ activeView, setActiveView }) => {
+  const t = useTranslations();
+  const navItems = [
+    { id: 'caserequests', label: t.advocateNav.caseRequests, icon: MailIcon, flag: true },
+    { id: 'airesearch', label: t.advocateNav.aiResearch, icon: FlaskConicalIcon, flag: true },
+    { id: 'aidrafts', label: t.advocateNav.aiDrafts, icon: FeatherIcon, flag: FEATURE_FLAGS.aiDraftGenerator },
+    { id: 'similarcases', label: t.advocateNav.similarCases, icon: FileClockIcon, flag: true },
+    { id: 'precedentsearch', label: t.advocateNav.precedentSearch, icon: SearchIcon, flag: true },
+    { id: 'argumentbuilder', label: t.advocateNav.argumentBuilder, icon: UsersIcon, flag: true },
+    { id: 'calendar', label: t.advocateNav.smartCalendar, icon: CalendarIcon, flag: FEATURE_FLAGS.smartCalendar },
+  ];
   const availableNavItems = navItems.filter(item => item.flag);
   
   return (
     <nav className="w-full md:w-64 flex-shrink-0">
       <div className="bg-[rgb(var(--card))] rounded-lg shadow-md border border-[rgb(var(--border))] p-2">
-        <h2 className="text-lg font-bold text-[rgb(var(--card-foreground))] p-3">Advocate Tools</h2>
+        <h2 className="text-lg font-bold text-[rgb(var(--card-foreground))] p-3">{t.advocateNav.tools}</h2>
         <ul className="space-y-1">
           {availableNavItems.map((item) => {
             const isActive = activeView === item.id;

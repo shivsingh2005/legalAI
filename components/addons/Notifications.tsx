@@ -3,6 +3,7 @@ import type { AppNotification } from '../../types';
 import { MailIcon } from '../icons/MailIcon';
 import { FeatherIcon } from '../icons/FeatherIcon';
 import { GavelIcon } from '../icons/GavelIcon';
+import { useTranslations } from '../../hooks/useTranslations';
 
 const mockNotifications: AppNotification[] = [
     { id: 1, icon: 'case', message: 'New case request received from Priya Desai.', timestamp: '2 minutes ago', read: false },
@@ -21,10 +22,11 @@ const NotificationIcon: React.FC<{ icon: AppNotification['icon'] }> = ({ icon })
 };
 
 export const Notifications: React.FC<{ onClose: () => void }> = ({ onClose }) => {
+    const t = useTranslations();
     return (
         <div className="absolute right-0 mt-2 w-80 bg-[rgb(var(--card))] border border-[rgb(var(--border))] rounded-lg shadow-xl z-50">
             <div className="p-3 border-b border-[rgb(var(--border))]">
-                <h3 className="font-semibold text-sm text-[rgb(var(--card-foreground))]">Notifications</h3>
+                <h3 className="font-semibold text-sm text-[rgb(var(--card-foreground))]">{t.notifications.title}</h3>
             </div>
             <div className="divide-y divide-[rgb(var(--border))] max-h-96 overflow-y-auto">
                 {mockNotifications.map(notification => (
@@ -42,7 +44,7 @@ export const Notifications: React.FC<{ onClose: () => void }> = ({ onClose }) =>
             </div>
              <div className="p-2 border-t border-[rgb(var(--border))] text-center">
                 <button className="text-xs font-medium text-[rgb(var(--primary))] hover:underline">
-                    Mark all as read
+                    {t.notifications.markAllRead}
                 </button>
             </div>
         </div>

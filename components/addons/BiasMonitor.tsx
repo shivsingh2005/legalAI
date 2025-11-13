@@ -3,12 +3,14 @@ import { monitorForBias } from '../../services/geminiService';
 import type { BiasAnalysisResult } from '../../types';
 import { Spinner } from '../Spinner';
 import { ShieldCheckIcon } from '../icons/ShieldCheckIcon';
+import { useTranslations } from '../../hooks/useTranslations';
 
 export const BiasMonitor: React.FC = () => {
     const [documentText, setDocumentText] = useState('');
     const [result, setResult] = useState<BiasAnalysisResult | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const t = useTranslations();
 
     const handleAnalyze = useCallback(async () => {
         if (!documentText.trim()) {
@@ -32,13 +34,13 @@ export const BiasMonitor: React.FC = () => {
 
     return (
         <div className="h-full flex flex-col">
-            <h2 className="text-xl font-semibold mb-4 text-[rgb(var(--card-foreground))]">AI Bias & Hallucination Monitor</h2>
+            <h2 className="text-xl font-semibold mb-4 text-[rgb(var(--card-foreground))]">{t.biasMonitor.title}</h2>
             <div className="flex-shrink-0">
-                <p className="text-sm text-[rgb(var(--muted-foreground))] mb-2">Enter any legal text (e.g., draft judgments, arguments) to scan for potential biases.</p>
+                <p className="text-sm text-[rgb(var(--muted-foreground))] mb-2">{t.biasMonitor.description}</p>
                 <textarea
                     value={documentText}
                     onChange={(e) => setDocumentText(e.target.value)}
-                    placeholder="Paste text here to analyze..."
+                    placeholder={t.biasMonitor.placeholder}
                     className="w-full h-32 p-3 border border-[rgb(var(--border))] rounded-md focus:ring-2 focus:ring-[rgb(var(--ring))] bg-[rgb(var(--background))] text-[rgb(var(--foreground))]"
                     disabled={isLoading}
                 />
@@ -47,7 +49,7 @@ export const BiasMonitor: React.FC = () => {
                     disabled={isLoading || !documentText}
                     className="mt-2 w-full px-6 py-3 bg-[rgb(var(--primary))] text-[rgb(var(--primary-foreground))] font-semibold rounded-md hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
-                    {isLoading ? <><Spinner /> Analyzing...</> : <><ShieldCheckIcon className="w-5 h-5" /> Analyze for Bias</>}
+                    {isLoading ? <><Spinner /> {t.biasMonitor.analyzing}</> : <><ShieldCheckIcon className="w-5 h-5" /> {t.biasMonitor.analyze}</>}
                 </button>
             </div>
             <div className="flex-grow mt-4 overflow-y-auto pr-2">
@@ -55,27 +57,27 @@ export const BiasMonitor: React.FC = () => {
                     <div className="flex items-center justify-center h-full">
                         <div className="text-center">
                             <Spinner />
-                            <p className="mt-2 text-[rgb(var(--muted-foreground))]">Scanning for potential bias...</p>
+                            <p className="mt-2 text-[rgb(var(--muted-foreground))]">{t.biasMonitor.scanning}</p>
                         </div>
                     </div>
                 )}
                 {error && (
                     <div className="bg-red-500/10 border border-red-500/20 text-red-500 px-4 py-3 rounded-lg" role="alert">
-                        <p><strong className="font-bold">Error: </strong>{error}</p>
+                        <p><strong className="font-bold">{t.error}: </strong>{error}</p>
                     </div>
                 )}
                 {result && (
                     <div>
                         {result.has_bias === false ? (
                              <div className="bg-green-500/10 border-l-4 border-green-500 text-green-700 p-4 rounded-r-lg" role="alert">
-                                <p className="font-bold">No Bias Detected</p>
-                                <p>The AI model did not find any significant instances of common biases in the provided text.</p>
+                                <p className="font-bold">{t.biasMonitor.noBias}</p>
+                                <p>{t.biasMonitor.noBiasDetails}</p>
                             </div>
                         ) : (
                             <div className="space-y-4">
                                 <div className="bg-amber-500/10 border-l-4 border-amber-500 text-amber-700 p-4 rounded-r-lg" role="alert">
-                                    <p className="font-bold">Potential Bias Detected</p>
-                                    <p>The following phrases have been flagged for review. Please assess the context carefully.</p>
+                                    <p className="font-bold">{t.biasMonitor.biasDetected}</p>
+                                    <p>{t.biasMonitor.biasDetectedDetails}</p>
                                 </div>
                                 {result.findings.map((finding, index) => (
                                     <div key={index} className="bg-[rgb(var(--background))] p-4 rounded-lg border border-[rgb(var(--border))]">
@@ -83,9 +85,9 @@ export const BiasMonitor: React.FC = () => {
                                             "{finding.phrase}"
                                         </blockquote>
                                         <div className="mt-3 text-sm space-y-2">
-                                            <p><strong className="text-[rgb(var(--foreground))]">Bias Type:</strong> <span className="font-mono bg-[rgb(var(--secondary))] text-[rgb(var(--secondary-foreground))] px-2 py-0.5 rounded">{finding.bias_type}</span></p>
-                                            <p><strong className="text-[rgb(var(--foreground))]">Explanation:</strong> {finding.explanation}</p>
-                                            <p><strong className="text-[rgb(var(--foreground))]">Suggestion:</strong> <span className="text-green-600">{finding.suggestion}</span></p>
+                                            <p><strong className="text-[rgb(var(--foreground))]">{t.biasMonitor.biasType}:</strong> <span className="font-mono bg-[rgb(var(--secondary))] text-[rgb(var(--secondary-foreground))] px-2 py-0.5 rounded">{finding.bias_type}</span></p>
+                                            <p><strong className="text-[rgb(var(--foreground))]">{t.biasMonitor.explanation}:</strong> {finding.explanation}</p>
+                                            <p><strong className="text-[rgb(var(--foreground))]">{t.biasMonitor.suggestion}:</strong> <span className="text-green-600">{finding.suggestion}</span></p>
                                         </div>
                                     </div>
                                 ))}

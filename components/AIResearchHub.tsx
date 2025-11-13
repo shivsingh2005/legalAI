@@ -3,6 +3,7 @@ import type { AIResearchPipelineResult, SimilarCaseAnalysisResult, RAGResult } f
 import { getSimilarCases, performRAGSearch, getAIResearchSummary } from '../services/geminiService';
 import { Spinner } from './Spinner';
 import { FlaskConicalIcon } from './icons/FlaskConicalIcon';
+import { useTranslations } from '../hooks/useTranslations';
 
 const pipelineStages = [
     "Analyzing Case Facts...",
@@ -25,6 +26,7 @@ export const AIResearchHub: React.FC = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [currentStage, setCurrentStage] = useState(0);
+    const t = useTranslations();
 
     const handlePipelineRun = useCallback(async () => {
         if (!caseFacts.trim()) {
@@ -63,15 +65,15 @@ export const AIResearchHub: React.FC = () => {
 
     return (
         <div>
-            <h1 className="text-2xl font-bold text-[rgb(var(--foreground))] mb-1">AI Legal Research Hub</h1>
-            <p className="text-[rgb(var(--muted-foreground))] mb-6">Execute the multi-stage AI pipeline to get comprehensive case insights.</p>
+            <h1 className="text-2xl font-bold text-[rgb(var(--foreground))] mb-1">{t.aiResearchHub.title}</h1>
+            <p className="text-[rgb(var(--muted-foreground))] mb-6">{t.aiResearchHub.description}</p>
 
             <div className="bg-[rgb(var(--card))] border border-[rgb(var(--border))] rounded-lg shadow-md p-6">
-                <h2 className="text-lg font-semibold text-[rgb(var(--card-foreground))]">Step 1: Enter Case Details</h2>
+                <h2 className="text-lg font-semibold text-[rgb(var(--card-foreground))]">{t.aiResearchHub.step1}</h2>
                 <textarea
                     value={caseFacts}
                     onChange={(e) => setCaseFacts(e.target.value)}
-                    placeholder="Provide a detailed summary of the case facts, including key events, parties involved, and the primary legal questions..."
+                    placeholder={t.aiResearchHub.placeholder}
                     className="w-full h-40 mt-2 p-3 border border-[rgb(var(--border))] rounded-md focus:ring-2 focus:ring-[rgb(var(--ring))] bg-[rgb(var(--background))] text-[rgb(var(--foreground))]"
                     disabled={isLoading}
                 />
@@ -81,7 +83,7 @@ export const AIResearchHub: React.FC = () => {
                     className="mt-4 w-full sm:w-auto px-6 py-3 bg-[rgb(var(--primary))] text-[rgb(var(--primary-foreground))] font-semibold rounded-md hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
                     <FlaskConicalIcon className="w-5 h-5" />
-                    {isLoading ? 'Running AI Pipeline...' : 'Run AI Pipeline'}
+                    {isLoading ? t.aiResearchHub.running : t.aiResearchHub.run}
                 </button>
             </div>
             
@@ -97,20 +99,20 @@ export const AIResearchHub: React.FC = () => {
                 )}
                 {error && (
                     <div className="bg-red-500/10 border border-red-500/20 text-red-700 px-4 py-3 rounded-lg" role="alert">
-                        <p><strong className="font-bold">Error: </strong>{error}</p>
+                        <p><strong className="font-bold">{t.error}: </strong>{error}</p>
                     </div>
                 )}
                 {result && (
                      <div className="bg-[rgb(var(--card))] border border-[rgb(var(--border))] rounded-lg shadow-md p-6 space-y-4">
-                        <h2 className="text-xl font-bold text-[rgb(var(--foreground))]">AI Legal Research Summary</h2>
+                        <h2 className="text-xl font-bold text-[rgb(var(--foreground))]">{t.aiResearchHub.summaryTitle}</h2>
                         
                         <div className="p-4 bg-[rgb(var(--muted))] rounded-lg">
-                            <h3 className="font-semibold text-[rgb(var(--card-foreground))]">Case Context</h3>
+                            <h3 className="font-semibold text-[rgb(var(--card-foreground))]">{t.aiResearchHub.caseContext}</h3>
                             <p className="text-sm text-[rgb(var(--muted-foreground))]">{result.case_context}</p>
                         </div>
 
                         <div>
-                            <h3 className="font-semibold text-[rgb(var(--card-foreground))]">Similar Cases Found</h3>
+                            <h3 className="font-semibold text-[rgb(var(--card-foreground))]">{t.aiResearchHub.similarCases}</h3>
                             <ul className="list-disc list-inside space-y-1 mt-1 text-sm">
                             {result.similar_cases.map((c, i) => (
                                 <li key={i} className="text-[rgb(var(--foreground))]">
@@ -121,7 +123,7 @@ export const AIResearchHub: React.FC = () => {
                         </div>
                         
                          <div>
-                            <h3 className="font-semibold text-[rgb(var(--card-foreground))]">Relevant Statutes (from RAG)</h3>
+                            <h3 className="font-semibold text-[rgb(var(--card-foreground))]">{t.aiResearchHub.ragResults}</h3>
                             <ul className="list-disc list-inside space-y-1 mt-1 text-sm">
                             {result.rag_results.map((r, i) => (
                                 <li key={i} className="text-[rgb(var(--foreground))]">
@@ -132,12 +134,12 @@ export const AIResearchHub: React.FC = () => {
                         </div>
 
                         <div className="p-4 bg-green-500/10 border-l-4 border-green-500 rounded-r-lg">
-                            <h3 className="font-semibold text-green-800 dark:text-green-300">Final Summary & Outlook</h3>
+                            <h3 className="font-semibold text-green-800 dark:text-green-300">{t.aiResearchHub.finalSummary}</h3>
                             <p className="text-sm text-green-700 dark:text-green-200 mt-1">{result.final_summary}</p>
                         </div>
                         
                          <div className="p-4 bg-sky-500/10 border-l-4 border-sky-500 rounded-r-lg">
-                            <h3 className="font-semibold text-sky-800 dark:text-sky-300">Suggested Core Argument</h3>
+                            <h3 className="font-semibold text-sky-800 dark:text-sky-300">{t.aiResearchHub.coreArgument}</h3>
                             <p className="text-sm text-sky-700 dark:text-sky-200 mt-1">{result.argument_suggestion}</p>
                         </div>
                      </div>

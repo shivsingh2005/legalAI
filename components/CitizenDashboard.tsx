@@ -6,6 +6,7 @@ import type { CitizenAnalysisResult, RecommendedLawyer } from '../types';
 import { Chatbot } from './Chatbot';
 import { ChatBubbleIcon } from './icons/ChatBubbleIcon';
 import { UsersIcon } from './icons/UsersIcon';
+import { useTranslations } from '../hooks/useTranslations';
 
 export const CitizenDashboard: React.FC = () => {
   const [analysisResult, setAnalysisResult] =
@@ -14,6 +15,7 @@ export const CitizenDashboard: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [isChatbotOpen, setIsChatbotOpen] = useState(false);
   const resultsRef = useRef<{ scrollToLawyers: () => void }>(null);
+  const t = useTranslations();
 
   const handleAnalyze = useCallback(async (disputeText: string) => {
     if (!disputeText.trim()) {
@@ -54,20 +56,20 @@ export const CitizenDashboard: React.FC = () => {
        <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 mb-6">
         <div>
           <h1 className="text-3xl font-bold text-[rgb(var(--foreground))] mb-2">
-            Citizen Dashboard
+            {t.citizenDashboard.title}
           </h1>
           <p className="text-lg text-[rgb(var(--muted-foreground))]">
-            Get an AI-powered analysis of your legal issue.
+            {t.citizenDashboard.description}
           </p>
         </div>
         {analysisResult && (
           <button
             onClick={handleScrollToLawyers}
             className="flex-shrink-0 flex items-center gap-2 px-4 py-2 bg-[rgb(var(--card))] text-[rgb(var(--secondary-foreground))] font-semibold rounded-md hover:bg-[rgb(var(--muted))] transition-colors shadow-custom border border-[rgb(var(--border))]"
-            aria-label="Scroll to recommended lawyers"
+            aria-label={t.citizenDashboard.viewLawyers}
           >
             <UsersIcon className="w-5 h-5 text-[rgb(var(--primary))]"/>
-            View Recommended Lawyers
+            {t.citizenDashboard.viewLawyers}
           </button>
         )}
       </div>
@@ -86,7 +88,7 @@ export const CitizenDashboard: React.FC = () => {
           <button
               onClick={() => setIsChatbotOpen(true)}
               className="fixed bottom-8 right-8 bg-[rgb(var(--primary))] text-[rgb(var(--primary-foreground))] p-4 rounded-full shadow-custom-lg hover:opacity-90 transition-all duration-300 z-40 transform hover:scale-110 animate-pulse"
-              aria-label="Open AI Assistant"
+              aria-label={t.citizenDashboard.openAIAssistant}
           >
               <ChatBubbleIcon className="w-8 h-8" />
           </button>

@@ -1,6 +1,7 @@
 import React from 'react';
 import type { RecommendedLawyer } from '../types';
 import { UserPlusIcon } from './icons/UserPlusIcon';
+import { useTranslations } from '../hooks/useTranslations';
 
 interface RecommendedLawyerCardProps {
   lawyer: RecommendedLawyer;
@@ -8,6 +9,7 @@ interface RecommendedLawyerCardProps {
 }
 
 export const RecommendedLawyerCard: React.FC<RecommendedLawyerCardProps> = ({ lawyer, onRequest }) => {
+  const t = useTranslations();
   return (
     <div className="bg-[rgb(var(--muted))] p-4 rounded-xl border border-[rgb(var(--border))] transition-all duration-300 hover:shadow-custom hover:border-[rgb(var(--primary))]">
       <div className="flex flex-col sm:flex-row justify-between sm:items-center">
@@ -25,15 +27,15 @@ export const RecommendedLawyerCard: React.FC<RecommendedLawyerCardProps> = ({ la
       </div>
       <div className="mt-3 pt-3 border-t border-[rgb(var(--border))] grid grid-cols-2 sm:grid-cols-3 gap-4 text-sm">
         <div>
-          <span className="text-[rgb(var(--muted-foreground))] block text-xs">Location</span>
+          <span className="text-[rgb(var(--muted-foreground))] block text-xs">{t.recommendedLawyer.location}</span>
           <span className="font-semibold text-[rgb(var(--foreground))]">{lawyer.location}</span>
         </div>
         <div>
-          <span className="text-[rgb(var(--muted-foreground))] block text-xs">Experience</span>
-          <span className="font-semibold text-[rgb(var(--foreground))]">{lawyer.experience_years} Years</span>
+          <span className="text-[rgb(var(--muted-foreground))] block text-xs">{t.recommendedLawyer.experience}</span>
+          <span className="font-semibold text-[rgb(var(--foreground))]">{lawyer.experience_years} {t.recommendedLawyer.years}</span>
         </div>
         <div>
-          <span className="text-[rgb(var(--muted-foreground))] block text-xs">Success Rate</span>
+          <span className="text-[rgb(var(--muted-foreground))] block text-xs">{t.recommendedLawyer.successRate}</span>
           <span className="font-semibold text-green-600 dark:text-green-400">{lawyer.success_rate}</span>
         </div>
       </div>

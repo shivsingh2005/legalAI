@@ -6,6 +6,7 @@ import { PaperPlaneIcon } from './icons/PaperPlaneIcon';
 import { LightbulbIcon } from './icons/LightbulbIcon';
 import { DoubleCheckIcon } from './icons/DoubleCheckIcon';
 import { SparklesIcon } from './icons/SparklesIcon';
+import { useTranslations } from '../hooks/useTranslations';
 
 
 interface CaseChatProps {
@@ -26,6 +27,7 @@ export const CaseChat: React.FC<CaseChatProps> = ({ caseRequest, messages, curre
     const [isSuggesting, setIsSuggesting] = useState(false);
     const [suggestionsResult, setSuggestionsResult] = useState<NextStepsResponse | null>(null);
     const messagesEndRef = useRef<HTMLDivElement>(null);
+    const t = useTranslations();
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -93,9 +95,9 @@ export const CaseChat: React.FC<CaseChatProps> = ({ caseRequest, messages, curre
             {/* Header */}
             <header className="flex justify-between items-center p-4 border-b border-[rgb(var(--border))] flex-shrink-0">
                 <div>
-                    <h3 className="font-bold text-lg">Case Chat: {caseRequest.id}</h3>
+                    <h3 className="font-bold text-lg">{t.caseChat.title.replace('{caseId}', caseRequest.id)}</h3>
                     <p className="text-sm text-[rgb(var(--muted-foreground))]">
-                        Conversation with {currentUserRole === 'advocate' ? caseRequest.userName : 'Your Advocate'}
+                        {t.caseChat.conversationWith.replace('{userName}', currentUserRole === 'advocate' ? caseRequest.userName : 'Your Advocate')}
                     </p>
                 </div>
                 <button onClick={onClose} className="p-2 rounded-full text-[rgb(var(--muted-foreground))] hover:bg-[rgb(var(--muted))]">
@@ -128,7 +130,7 @@ export const CaseChat: React.FC<CaseChatProps> = ({ caseRequest, messages, curre
                     <div className="flex justify-start">
                         <div className="rounded-lg px-4 py-2 bg-[rgb(var(--card))] border border-[rgb(var(--border))] flex items-center shadow-sm">
                             <Spinner />
-                            <span className="ml-2 text-sm text-[rgb(var(--muted-foreground))]">Typing...</span>
+                            <span className="ml-2 text-sm text-[rgb(var(--muted-foreground))]">{t.caseChat.typing}</span>
                         </div>
                     </div>
                 )}
@@ -140,13 +142,13 @@ export const CaseChat: React.FC<CaseChatProps> = ({ caseRequest, messages, curre
                  <div className="p-4 border-t border-[rgb(var(--border))] bg-[rgb(var(--muted))] flex-shrink-0">
                     {summary && (
                         <>
-                            <h4 className="font-semibold text-sm mb-2 flex items-center gap-2"><LightbulbIcon className="w-5 h-5 text-amber-500"/> AI Generated Summary</h4>
+                            <h4 className="font-semibold text-sm mb-2 flex items-center gap-2"><LightbulbIcon className="w-5 h-5 text-amber-500"/> {t.caseChat.aiSummary}</h4>
                             <div className="text-xs max-h-24 overflow-y-auto prose prose-sm text-[rgb(var(--foreground))] bg-[rgb(var(--background))] p-2 rounded-md" dangerouslySetInnerHTML={{ __html: summary.replace(/\n/g, '<br />') }} />
                         </>
                     )}
                     {suggestionsResult && (
                         <>
-                            <h4 className="font-semibold text-sm mb-2 flex items-center gap-2"><SparklesIcon className="w-5 h-5 text-sky-500"/> AI Suggested Next Steps</h4>
+                            <h4 className="font-semibold text-sm mb-2 flex items-center gap-2"><SparklesIcon className="w-5 h-5 text-sky-500"/> {t.caseChat.aiNextSteps}</h4>
                             <div className="text-xs max-h-24 overflow-y-auto text-[rgb(var(--foreground))] bg-[rgb(var(--background))] p-2 rounded-md">
                                 {suggestionsResult.clarification_needed ? (
                                     <p className="italic text-amber-600">{suggestionsResult.clarification_needed}</p>
@@ -169,7 +171,7 @@ export const CaseChat: React.FC<CaseChatProps> = ({ caseRequest, messages, curre
                         onClick={handleSuggestNextSteps}
                         disabled={isSuggesting || messages.length === 0}
                         className="p-2 text-[rgb(var(--muted-foreground))] hover:text-[rgb(var(--primary))] rounded-full disabled:opacity-50"
-                        title="Ask AI to Suggest Next Steps"
+                        title={t.caseChat.suggestNextSteps}
                     >
                         {isSuggesting ? <Spinner /> : <SparklesIcon className="w-6 h-6" />}
                     </button>
@@ -177,7 +179,7 @@ export const CaseChat: React.FC<CaseChatProps> = ({ caseRequest, messages, curre
                         onClick={handleSummarize}
                         disabled={isSummarizing || messages.length === 0}
                         className="p-2 text-[rgb(var(--muted-foreground))] hover:text-[rgb(var(--primary))] rounded-full disabled:opacity-50"
-                        title="Ask AI for Summary"
+                        title={t.caseChat.askForSummary}
                     >
                         {isSummarizing ? <Spinner /> : <LightbulbIcon className="w-6 h-6" />}
                     </button>
@@ -186,7 +188,7 @@ export const CaseChat: React.FC<CaseChatProps> = ({ caseRequest, messages, curre
                         value={input}
                         onChange={(e) => setInput(e.target.value)}
                         onKeyPress={handleKeyPress}
-                        placeholder="Type a message..."
+                        placeholder={t.caseChat.placeholder}
                         className="flex-1 bg-[rgb(var(--muted))] border border-[rgb(var(--border))] rounded-full px-4 py-2 focus:ring-2 focus:ring-[rgb(var(--ring))] focus:outline-none"
                     />
                     <button onClick={handleSend} disabled={!input.trim()} className="bg-[rgb(var(--primary))] text-white p-3 rounded-full hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed">

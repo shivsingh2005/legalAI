@@ -4,6 +4,7 @@ import { BriefcaseIcon } from './icons/BriefcaseIcon';
 import { UsersIcon } from './icons/UsersIcon';
 // FIX: Import shared types from the centralized types.ts file.
 import type { UserRole } from '../types';
+import { useTranslations } from '../hooks/useTranslations';
 
 interface LoginPageProps {
   onLogin: (role: UserRole) => void;
@@ -33,6 +34,7 @@ const RoleCard: React.FC<{
 );
 
 export const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
+  const t = useTranslations();
   return (
     <div className="min-h-screen w-full flex flex-col items-center justify-center bg-[rgb(var(--background))] p-4 font-sans relative overflow-hidden">
         <div className="absolute inset-0 z-0 opacity-50">
@@ -47,38 +49,38 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
         </div>
       <div className="w-full max-w-2xl mx-auto z-10">
         <div className="text-center mb-10">
-            <h1 className="text-5xl font-bold text-[rgb(var(--foreground))] tracking-tight">AI Justice Hub</h1>
-            <p className="mt-3 text-lg text-[rgb(var(--muted-foreground))]">AI-Driven Judicial Precedent & Case Management</p>
+            <h1 className="text-5xl font-bold text-[rgb(var(--foreground))] tracking-tight">{t.login.mainTitle}</h1>
+            <p className="mt-3 text-lg text-[rgb(var(--muted-foreground))]">{t.login.subtitle}</p>
         </div>
         
         <div className="bg-[rgb(var(--card))] border border-[rgb(var(--border))] rounded-2xl p-8 shadow-custom-lg backdrop-blur-sm bg-opacity-80 dark:bg-opacity-80">
-          <h2 className="text-2xl font-semibold text-center text-[rgb(var(--card-foreground))] mb-6">Select Your Role</h2>
+          <h2 className="text-2xl font-semibold text-center text-[rgb(var(--card-foreground))] mb-6">{t.login.selectRole}</h2>
           <div className="space-y-4">
             <RoleCard
               role="citizen"
-              title="Citizen / User"
-              description="File a new case, get AI-powered legal summaries, and find lawyer recommendations."
+              title={t.login.citizenTitle}
+              description={t.login.citizenDescription}
               icon={<UsersIcon className="h-6 w-6 text-[rgb(var(--primary))]" />}
               onSelect={onLogin}
             />
             <RoleCard
               role="advocate"
-              title="Advocate"
-              description="Access precedent search, analytics, and build compelling legal arguments."
+              title={t.login.advocateTitle}
+              description={t.login.advocateDescription}
               icon={<BriefcaseIcon className="h-6 w-6 text-[rgb(var(--primary))]" />}
               onSelect={onLogin}
             />
             <RoleCard
               role="judge"
-              title="Judge"
-              description="Utilize the precedent engine, explainable AI, and view immutable case logs."
+              title={t.login.judgeTitle}
+              description={t.login.judgeDescription}
               icon={<GavelIcon className="h-6 w-6 text-[rgb(var(--primary))]" />}
               onSelect={onLogin}
             />
           </div>
         </div>
          <p className="text-xs text-[rgb(var(--muted-foreground))] mt-6 text-center">
-            This platform is DPDP Act 2023 Compliant. All data is handled with strict privacy protocols.
+            {t.login.compliance}
         </p>
       </div>
     </div>

@@ -1,6 +1,7 @@
 import React from 'react';
 import type { CaseRequest } from '../types';
 import { ChatIcon } from './icons/ChatIcon';
+import { useTranslations } from '../hooks/useTranslations';
 
 interface RequestCardProps {
     request: CaseRequest;
@@ -38,6 +39,7 @@ const UrgencyBadge: React.FC<{ urgency: CaseRequest['urgency'] }> = ({ urgency }
 }
 
 export const RequestCard: React.FC<RequestCardProps> = ({ request, onAccept, onReject, onOpenChat }) => {
+    const t = useTranslations();
     const timeAgo = (dateString: string) => {
         const date = new Date(dateString);
         const seconds = Math.floor((new Date().getTime() - date.getTime()) / 1000);
@@ -64,7 +66,7 @@ export const RequestCard: React.FC<RequestCardProps> = ({ request, onAccept, onR
             <div className="flex justify-between items-start">
                 <div>
                     <h3 className="font-bold text-[rgb(var(--card-foreground))]">{request.userName}</h3>
-                    <p className="text-xs text-[rgb(var(--muted-foreground))]">Received {timeAgo(request.timestamp)}</p>
+                    <p className="text-xs text-[rgb(var(--muted-foreground))]">{t.requestCard.received.replace('{timeAgo}', timeAgo(request.timestamp))}</p>
                 </div>
                 <div className="flex items-center gap-2">
                     {isClickable && <ChatIcon className="w-5 h-5 text-[rgb(var(--primary))]"/>}
@@ -75,7 +77,7 @@ export const RequestCard: React.FC<RequestCardProps> = ({ request, onAccept, onR
 
             <div className="flex flex-wrap items-center justify-between gap-2">
                 <div className="flex items-center gap-2">
-                    <span className="text-xs font-semibold text-[rgb(var(--muted-foreground))]">Domain:</span>
+                    <span className="text-xs font-semibold text-[rgb(var(--muted-foreground))]">{t.requestCard.domain}:</span>
                     <span className="text-xs font-medium bg-[rgb(var(--secondary))] text-[rgb(var(--secondary-foreground))] px-2 py-0.5 rounded">{request.legalDomain}</span>
                     <UrgencyBadge urgency={request.urgency} />
                 </div>
@@ -85,13 +87,13 @@ export const RequestCard: React.FC<RequestCardProps> = ({ request, onAccept, onR
                             onClick={onReject}
                             className="px-4 py-1.5 text-sm font-semibold text-red-700 bg-red-100 rounded-md hover:bg-red-200 transition-colors"
                         >
-                            Reject
+                            {t.requestCard.reject}
                         </button>
                         <button
                             onClick={onAccept}
                             className="px-4 py-1.5 text-sm font-semibold text-[rgb(var(--primary-foreground))] bg-[rgb(var(--primary))] rounded-md hover:opacity-90 transition-opacity"
                         >
-                            Accept
+                            {t.requestCard.accept}
                         </button>
                     </div>
                 )}

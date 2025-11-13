@@ -7,6 +7,7 @@ import { ChartBarIcon } from './icons/ChartBarIcon';
 import { UsersIcon } from './icons/UsersIcon';
 import { GavelIcon } from './icons/GavelIcon';
 import { FileTextIcon } from './icons/FileTextIcon';
+import { useTranslations } from '../hooks/useTranslations';
 
 
 interface SidebarProps {
@@ -37,21 +38,21 @@ const NavItem: React.FC<NavItemProps> = ({ view, label, icon, isActive, onClick 
   </button>
 );
 
-const getNavItemsForRole = (role: UserRole) => {
+const getNavItemsForRole = (role: UserRole, t: any) => {
     const judgeItems = [
-        { view: 'dashboard' as ViewType, label: "Judge's Dashboard", icon: <GavelIcon className="h-5 w-5" /> },
-        { view: 'analytics' as ViewType, label: 'Judicial Analytics', icon: <ChartBarIcon className="h-5 w-5" /> },
+        { view: 'dashboard' as ViewType, label: t.sidebar.judgesDashboard, icon: <GavelIcon className="h-5 w-5" /> },
+        { view: 'analytics' as ViewType, label: t.sidebar.judicialAnalytics, icon: <ChartBarIcon className="h-5 w-5" /> },
     ];
 
     const advocateItems = [
-        { view: 'dashboard' as ViewType, label: 'Advocate Dashboard', icon: <BriefcaseIcon className="h-5 w-5" /> },
-        { view: 'search' as ViewType, label: 'Precedent Search', icon: <SearchIcon className="h-5 w-5" /> },
-        { view: 'builder' as ViewType, label: 'Argument Builder', icon: <UsersIcon className="h-5 w-5" /> },
+        { view: 'dashboard' as ViewType, label: t.sidebar.advocateDashboard, icon: <BriefcaseIcon className="h-5 w-5" /> },
+        { view: 'search' as ViewType, label: t.sidebar.precedentSearch, icon: <SearchIcon className="h-5 w-5" /> },
+        { view: 'builder' as ViewType, label: t.sidebar.argumentBuilder, icon: <UsersIcon className="h-5 w-5" /> },
     ];
 
     const citizenItems = [
-        { view: 'dashboard' as ViewType, label: 'Citizen Dashboard', icon: <UsersIcon className="h-5 w-5" /> },
-        { view: 'case_filing' as ViewType, label: 'Case Filing', icon: <FileTextIcon className="h-5 w-5" /> },
+        { view: 'dashboard' as ViewType, label: t.sidebar.citizenDashboard, icon: <UsersIcon className="h-5 w-5" /> },
+        { view: 'case_filing' as ViewType, label: t.sidebar.caseFiling, icon: <FileTextIcon className="h-5 w-5" /> },
     ];
     
     switch (role) {
@@ -64,8 +65,8 @@ const getNavItemsForRole = (role: UserRole) => {
 
 
 export const Sidebar: React.FC<SidebarProps> = ({ userRole, activeView, setActiveView }) => {
-  
-  const navItems = getNavItemsForRole(userRole);
+  const t = useTranslations();
+  const navItems = getNavItemsForRole(userRole, t);
 
   const handleNavigation = (view: ViewType) => {
     // For now, the main dashboards handle their own content.
@@ -84,7 +85,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ userRole, activeView, setActiv
   return (
     <div className="hidden lg:flex w-64 bg-slate-900/[0.95] dark:bg-slate-900/[0.9] text-white flex-col p-4">
       <div className="flex items-center justify-center h-16">
-        <h2 className="text-xl font-bold tracking-wider text-white">AI Justice Hub</h2>
+        <h2 className="text-xl font-bold tracking-wider text-white">{t.sidebar.title}</h2>
       </div>
       <nav className="flex-1 mt-6 space-y-2">
         {navItems.map((item) => (
@@ -99,7 +100,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ userRole, activeView, setActiv
         ))}
       </nav>
        <div className="p-4 text-center">
-            <p className="text-xs text-slate-400">DPDP Act 2023 Compliant</p>
+            <p className="text-xs text-slate-400">{t.sidebar.compliance}</p>
         </div>
     </div>
   );

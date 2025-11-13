@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { UploadIcon } from './icons/UploadIcon';
 import { Spinner } from './Spinner';
+import { useTranslations } from '../hooks/useTranslations';
 
 interface DisputeInputFormProps {
   onAnalyze: (disputeText: string) => void;
@@ -10,6 +11,7 @@ interface DisputeInputFormProps {
 export const DisputeInputForm: React.FC<DisputeInputFormProps> = ({ onAnalyze, isLoading }) => {
   const [disputeText, setDisputeText] = useState('');
   const [fileName, setFileName] = useState('');
+  const t = useTranslations();
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -36,15 +38,15 @@ export const DisputeInputForm: React.FC<DisputeInputFormProps> = ({ onAnalyze, i
 
   return (
     <div className="bg-[rgb(var(--card))] p-6 rounded-xl shadow-custom-lg border border-[rgb(var(--border))] mb-8">
-      <h2 className="text-2xl font-semibold mb-2 text-[rgb(var(--card-foreground))]">Describe Your Case</h2>
+      <h2 className="text-2xl font-semibold mb-2 text-[rgb(var(--card-foreground))]">{t.disputeInput.title}</h2>
       <p className="text-[rgb(var(--muted-foreground))] mb-6">
-        Provide details about your legal dispute below. You can either type directly into the text box or upload a plain text (.txt) file. The more detail you provide, the more accurate the AI analysis will be.
+        {t.disputeInput.description}
       </p>
       <form onSubmit={handleSubmit}>
         <textarea
           value={disputeText}
           onChange={(e) => setDisputeText(e.target.value)}
-          placeholder="For example: 'I had a property dispute with my neighbor regarding the boundary line...'"
+          placeholder={t.disputeInput.placeholder}
           className="w-full h-48 p-3 border border-[rgb(var(--border))] rounded-md focus:ring-2 focus:ring-[rgb(var(--ring))] focus:border-[rgb(var(--primary))] transition duration-200 bg-[rgb(var(--background))] text-[rgb(var(--foreground))]"
           disabled={isLoading}
         />
@@ -52,7 +54,7 @@ export const DisputeInputForm: React.FC<DisputeInputFormProps> = ({ onAnalyze, i
         <div className="mt-4 flex flex-col sm:flex-row items-center justify-between gap-4">
           <label className="flex items-center gap-2 px-4 py-2 bg-[rgb(var(--muted))] text-[rgb(var(--muted-foreground))] rounded-md cursor-pointer hover:bg-[rgb(var(--border))] transition">
             <UploadIcon className="w-5 h-5" />
-            <span>{fileName ? `File: ${fileName}` : 'Upload .txt Document'}</span>
+            <span>{fileName ? t.disputeInput.uploading.replace('{fileName}', fileName) : t.disputeInput.upload}</span>
             <input type="file" className="hidden" onChange={handleFileChange} accept=".txt" disabled={isLoading} />
           </label>
           <button
@@ -60,12 +62,12 @@ export const DisputeInputForm: React.FC<DisputeInputFormProps> = ({ onAnalyze, i
             disabled={isLoading || !disputeText}
             className="w-full sm:w-auto px-6 py-3 bg-gradient-to-r from-[rgb(var(--primary))] to-[rgb(var(--accent))] text-[rgb(var(--primary-foreground))] font-semibold rounded-md hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 transform hover:scale-105 shadow-md hover:shadow-lg flex items-center justify-center gap-2"
           >
-            {isLoading ? <><Spinner /> Analyzing...</> : 'Analyze Case'}
+            {isLoading ? <><Spinner /> {t.disputeInput.analyzing}</> : t.disputeInput.analyze}
           </button>
         </div>
       </form>
       <p className="text-xs text-[rgb(var(--muted-foreground))] mt-6 text-center">
-        <strong>Data Privacy Notice:</strong> By submitting your case, you agree to have the data analyzed by an AI model. Please do not include sensitive personal identifiable information. We are compliant with the DPDP Act 2023.
+        <strong>{t.disputeInput.privacy}</strong> {t.disputeInput.privacyDetails}
       </p>
     </div>
   );

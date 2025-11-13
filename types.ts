@@ -4,6 +4,7 @@ import { Chat } from "@google/genai";
 export type UserRole = 'citizen' | 'advocate' | 'judge';
 export type ViewType = 'dashboard' | 'search' | 'builder' | 'analytics' | 'workspace' | 'case_filing';
 export type Theme = 'light' | 'dark';
+export type Language = 'en' | 'hi' | 'bn' | 'mr' | 'ta' | 'te' | 'kn';
 
 export interface RAGResult {
   answer: string;

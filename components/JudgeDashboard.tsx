@@ -6,15 +6,17 @@ import { FEATURE_FLAGS } from '../featureFlags';
 import { BiasMonitor } from './addons/BiasMonitor';
 import { EyeIcon } from './icons/EyeIcon';
 import { ShieldCheckIcon } from './icons/ShieldCheckIcon';
+import { useTranslations } from '../hooks/useTranslations';
 
 type JudgeView = 'explainability' | 'biasmonitor';
 
 export const JudgeDashboard: React.FC = () => {
     const [activeView, setActiveView] = useState<JudgeView>('explainability');
+    const t = useTranslations();
 
   return (
     <div>
-        <h1 className="text-3xl font-bold text-[rgb(var(--foreground))] mb-6">Judge's AI-Powered Dashboard</h1>
+        <h1 className="text-3xl font-bold text-[rgb(var(--foreground))] mb-6">{t.judgeDashboard.title}</h1>
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
             {/* Main Content: Explainable AI & Add-ons */}
             <div className="xl:col-span-2">
@@ -24,11 +26,11 @@ export const JudgeDashboard: React.FC = () => {
                             <nav className="-mb-px flex space-x-6">
                                 <button onClick={() => setActiveView('explainability')} className={`whitespace-nowrap pb-3 px-1 border-b-2 font-medium text-sm flex items-center gap-2 ${activeView === 'explainability' ? 'border-[rgb(var(--primary))] text-[rgb(var(--primary))]' : 'border-transparent text-[rgb(var(--muted-foreground))] hover:text-[rgb(var(--foreground))]'}`}>
                                     <EyeIcon className="w-5 h-5"/>
-                                    Explainable AI
+                                    {t.judgeDashboard.explainableAI}
                                 </button>
                                 <button onClick={() => setActiveView('biasmonitor')} className={`whitespace-nowrap pb-3 px-1 border-b-2 font-medium text-sm flex items-center gap-2 ${activeView === 'biasmonitor' ? 'border-[rgb(var(--primary))] text-[rgb(var(--primary))]' : 'border-transparent text-[rgb(var(--muted-foreground))] hover:text-[rgb(var(--foreground))]'}`}>
                                     <ShieldCheckIcon className="w-5 h-5"/>
-                                    AI Bias Monitor
+                                    {t.judgeDashboard.biasMonitor}
                                 </button>
                             </nav>
                         </div>

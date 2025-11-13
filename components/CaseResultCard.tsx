@@ -2,6 +2,7 @@ import React from 'react';
 import type { SimilarCase } from '../types';
 import { GavelIcon } from './icons/GavelIcon';
 import { BookmarkIcon } from './icons/BookmarkIcon';
+import { useTranslations } from '../hooks/useTranslations';
 
 interface CaseResultCardProps {
     caseItem: SimilarCase;
@@ -22,6 +23,7 @@ const RelevanceMeter: React.FC<{ score: number }> = ({ score }) => {
 };
 
 export const CaseResultCard: React.FC<CaseResultCardProps> = ({ caseItem }) => {
+    const t = useTranslations();
     return (
         <div className="bg-[rgb(var(--background))] border border-[rgb(var(--border))] rounded-lg p-4 my-4 transition-shadow hover:shadow-lg hover:border-[rgb(var(--accent))]">
             <div className="flex justify-between items-start">
@@ -31,13 +33,13 @@ export const CaseResultCard: React.FC<CaseResultCardProps> = ({ caseItem }) => {
                 </div>
                  <button className="ml-4 flex-shrink-0 text-xs px-2.5 py-1.5 bg-[rgb(var(--muted))] text-[rgb(var(--muted-foreground))] font-semibold rounded-md hover:bg-[rgb(var(--border))] transition-colors flex items-center gap-1.5">
                     <BookmarkIcon className="w-3.5 h-3.5" />
-                    Save
+                    {t.caseResultCard.save}
                 </button>
             </div>
 
             <div className="my-3">
                 <div className="flex justify-between items-center mb-1">
-                    <span className="text-xs font-medium text-[rgb(var(--muted-foreground))]">Relevance Score</span>
+                    <span className="text-xs font-medium text-[rgb(var(--muted-foreground))]">{t.caseResultCard.relevanceScore}</span>
                     <span className="text-xs font-semibold">{Math.round(caseItem.relevance_score * 100)}%</span>
                 </div>
                 <RelevanceMeter score={caseItem.relevance_score} />
@@ -45,20 +47,20 @@ export const CaseResultCard: React.FC<CaseResultCardProps> = ({ caseItem }) => {
             
             <div className="space-y-2 text-sm">
                 <div>
-                    <h5 className="font-semibold text-[rgb(var(--foreground))]">Summary of Decision</h5>
+                    <h5 className="font-semibold text-[rgb(var(--foreground))]">{t.caseResultCard.summary}</h5>
                     <p className="text-[rgb(var(--muted-foreground))]">{caseItem.summary_of_decision}</p>
                 </div>
                 <div>
                     <h5 className="font-semibold text-[rgb(var(--foreground))] flex items-center gap-1.5">
                         <GavelIcon className="w-4 h-4" />
-                        Legal Takeaway
+                        {t.caseResultCard.takeaway}
                     </h5>
                     <p className="text-[rgb(var(--foreground))] font-medium bg-[rgb(var(--muted))] p-2 rounded-md border-l-4 border-[rgb(var(--accent))]">{caseItem.legal_takeaway}</p>
                 </div>
             </div>
 
             <div className="mt-3 pt-2 border-t border-[rgb(var(--border))]">
-                 <h5 className="text-xs font-semibold text-[rgb(var(--muted-foreground))] mb-1">Key Sections Cited</h5>
+                 <h5 className="text-xs font-semibold text-[rgb(var(--muted-foreground))] mb-1">{t.caseResultCard.sectionsCited}</h5>
                  <div className="flex flex-wrap gap-1.5">
                     {caseItem.key_sections_cited.map((section, idx) => (
                         <span key={idx} className="text-xs font-mono bg-[rgb(var(--secondary))] text-[rgb(var(--secondary-foreground))] px-2 py-0.5 rounded-full">

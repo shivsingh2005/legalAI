@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import type { Chart } from 'chart.js';
 import type { ChartData } from '../types';
+import { useTranslations } from '../hooks/useTranslations';
 
 declare global {
     interface Window {
@@ -11,6 +12,7 @@ declare global {
 const RulingDistributionChart: React.FC = () => {
     const chartRef = useRef<HTMLCanvasElement>(null);
     const chartInstance = useRef<Chart | null>(null);
+    const t = useTranslations();
 
     const data: ChartData = {
         labels: ['Affirmed', 'Reversed', 'Remanded', 'Dismissed'],
@@ -47,14 +49,14 @@ const RulingDistributionChart: React.FC = () => {
                         responsive: true,
                         plugins: {
                             legend: { position: 'top' },
-                            title: { display: true, text: 'Ruling Distribution in Similar Cases' }
+                            title: { display: true, text: t.judicialAnalytics.rulingDistribution }
                         }
                     }
                 });
             }
         }
         return () => chartInstance.current?.destroy();
-    }, []);
+    }, [t]);
 
     return <canvas ref={chartRef}></canvas>;
 };
@@ -62,6 +64,7 @@ const RulingDistributionChart: React.FC = () => {
 const StatuteFrequencyChart: React.FC = () => {
     const chartRef = useRef<HTMLCanvasElement>(null);
     const chartInstance = useRef<Chart | null>(null);
+    const t = useTranslations();
     
     const data: ChartData = {
         labels: ['Statute 198.A', 'Precedent B v. C', 'Regulation 42-CFR', 'Statute 210.F', 'Precedent X v. Y'],
@@ -89,7 +92,7 @@ const StatuteFrequencyChart: React.FC = () => {
                         responsive: true,
                         plugins: {
                             legend: { display: false },
-                            title: { display: true, text: 'Most Influential Statutes by Frequency' }
+                            title: { display: true, text: t.judicialAnalytics.statuteFrequency }
                         },
                          scales: {
                             x: { beginAtZero: true }
@@ -99,16 +102,17 @@ const StatuteFrequencyChart: React.FC = () => {
             }
         }
         return () => chartInstance.current?.destroy();
-    }, []);
+    }, [t]);
 
     return <canvas ref={chartRef}></canvas>;
 }
 
 
 export const JudicialAnalyticsDashboard: React.FC = () => {
+  const t = useTranslations();
   return (
     <div>
-      <h1 className="text-3xl font-bold text-[rgb(var(--foreground))] mb-6">Judicial Analytics Dashboard</h1>
+      <h1 className="text-3xl font-bold text-[rgb(var(--foreground))] mb-6">{t.judicialAnalytics.title}</h1>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <div className="bg-[rgb(var(--card))] p-6 rounded-lg shadow-md">
             <RulingDistributionChart />

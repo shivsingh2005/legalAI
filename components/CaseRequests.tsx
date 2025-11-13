@@ -5,12 +5,14 @@ import { initialCaseRequests, initialChatHistories } from '../data/mockData';
 import { CaseChat } from './CaseChat';
 import { getChatSummary, getSuggestedNextSteps } from '../services/geminiService';
 import { ChatIcon } from './icons/ChatIcon';
+import { useTranslations } from '../hooks/useTranslations';
 
 export const CaseRequests: React.FC = () => {
   const [requests, setRequests] = useState<CaseRequest[]>([]);
   const [chatHistories, setChatHistories] = useState(initialChatHistories);
   const [loading, setLoading] = useState(true);
   const [chattingCase, setChattingCase] = useState<CaseRequest | null>(null);
+  const t = useTranslations();
 
   useEffect(() => {
     // Simulate API fetch
@@ -68,15 +70,15 @@ export const CaseRequests: React.FC = () => {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-5 gap-6" style={{ height: 'calc(100vh - 150px)'}}>
         <div className="lg:col-span-2 overflow-y-auto pr-2">
-            <h1 className="text-2xl font-bold text-[rgb(var(--foreground))] mb-1">Case Requests</h1>
-            <p className="text-[rgb(var(--muted-foreground))] mb-6">Review and respond to incoming client requests.</p>
+            <h1 className="text-2xl font-bold text-[rgb(var(--foreground))] mb-1">{t.caseRequests.title}</h1>
+            <p className="text-[rgb(var(--muted-foreground))] mb-6">{t.caseRequests.description}</p>
 
             {loading ? (
-                <p>Loading requests...</p>
+                <p>{t.caseRequests.loading}</p>
             ) : (
                 <div className="space-y-6">
                 <div>
-                    <h2 className="text-lg font-semibold text-[rgb(var(--card-foreground))] mb-3">Pending Requests ({pendingRequests.length})</h2>
+                    <h2 className="text-lg font-semibold text-[rgb(var(--card-foreground))] mb-3">{t.caseRequests.pending} ({pendingRequests.length})</h2>
                     {pendingRequests.length > 0 ? (
                         <div className="space-y-4">
                         {pendingRequests.map(request => (
@@ -90,12 +92,12 @@ export const CaseRequests: React.FC = () => {
                         </div>
                     ) : (
                         <div className="bg-[rgb(var(--card))] border border-[rgb(var(--border))] rounded-lg p-6 text-center">
-                            <p className="text-[rgb(var(--muted-foreground))]">No pending requests at the moment.</p>
+                            <p className="text-[rgb(var(--muted-foreground))]">{t.caseRequests.noPending}</p>
                         </div>
                     )}
                 </div>
                 <div>
-                    <h2 className="text-lg font-semibold text-[rgb(var(--card-foreground))] mb-3">Handled Requests ({handledRequests.length})</h2>
+                    <h2 className="text-lg font-semibold text-[rgb(var(--card-foreground))] mb-3">{t.caseRequests.handled} ({handledRequests.length})</h2>
                     {handledRequests.length > 0 ? (
                         <div className="space-y-4">
                         {handledRequests.map(request => (
@@ -108,7 +110,7 @@ export const CaseRequests: React.FC = () => {
                         </div>
                     ) : (
                         <div className="bg-[rgb(var(--card))] border border-[rgb(var(--border))] rounded-lg p-6 text-center">
-                            <p className="text-[rgb(var(--muted-foreground))]">No handled requests to show.</p>
+                            <p className="text-[rgb(var(--muted-foreground))]">{t.caseRequests.noHandled}</p>
                         </div>
                     )}
                 </div>
@@ -129,8 +131,8 @@ export const CaseRequests: React.FC = () => {
             ) : (
                 <div className="bg-[rgb(var(--card))] border-2 border-dashed border-[rgb(var(--border))] rounded-lg h-full flex flex-col items-center justify-center text-center p-4">
                     <ChatIcon className="w-16 h-16 text-[rgb(var(--muted-foreground))]"/>
-                    <h3 className="mt-4 text-lg font-semibold text-[rgb(var(--card-foreground))]">Secure Case Chat</h3>
-                    <p className="mt-1 text-sm text-[rgb(var(--muted-foreground))]">Select an 'Accepted' case from the list to view the conversation.</p>
+                    <h3 className="mt-4 text-lg font-semibold text-[rgb(var(--card-foreground))]">{t.caseRequests.chatTitle}</h3>
+                    <p className="mt-1 text-sm text-[rgb(var(--muted-foreground))]">{t.caseRequests.chatDescription}</p>
                 </div>
             )}
         </div>

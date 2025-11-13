@@ -5,6 +5,7 @@ import type { GeneralChatMessage } from '../types';
 import { Spinner } from './Spinner';
 import { CloseIcon } from './icons/CloseIcon';
 import { PaperPlaneIcon } from './icons/PaperPlaneIcon';
+import { useTranslations } from '../hooks/useTranslations';
 
 interface ChatbotProps {
     onClose: () => void;
@@ -17,6 +18,7 @@ export const Chatbot: React.FC<ChatbotProps> = ({ onClose, caseContext }) => {
     const [chat, setChat] = useState<Chat | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
+    const t = useTranslations();
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -35,11 +37,11 @@ export const Chatbot: React.FC<ChatbotProps> = ({ onClose, caseContext }) => {
         setChat(chatSession);
 
         const welcomeMessage = caseContext
-            ? "Hello! I'm your AI Case Assistant. How can I help you with the case you just filed?"
-            : "Hello! I'm the Legal AI Assistant. I can help you understand legal terms or describe your issue. How can I assist you today?";
+            ? t.chatbot.welcomeCase
+            : t.chatbot.welcomeGeneral;
 
         setMessages([{ sender: 'bot', text: welcomeMessage }]);
-    }, [caseContext]);
+    }, [caseContext, t]);
 
     const handleSend = async () => {
         if (!input.trim() || !chat) return;
@@ -65,7 +67,7 @@ export const Chatbot: React.FC<ChatbotProps> = ({ onClose, caseContext }) => {
             }
         } catch (error) {
             console.error('Chat error:', error);
-            setMessages(prev => [...prev, { sender: 'bot', text: 'Sorry, I encountered an error. Please try again.' }]);
+            setMessages(prev => [...prev, { sender: 'bot', text: t.chatbot.error }]);
         } finally {
             setIsLoading(false);
         }
@@ -81,7 +83,7 @@ export const Chatbot: React.FC<ChatbotProps> = ({ onClose, caseContext }) => {
         <div className="fixed bottom-8 right-8 w-full max-w-sm h-[calc(100%-4rem)] max-h-[600px] bg-[rgb(var(--card))] rounded-xl shadow-2xl flex flex-col z-50 border border-[rgb(var(--border))]">
             {/* Header */}
             <header className="flex justify-between items-center p-4 border-b border-[rgb(var(--border))] flex-shrink-0">
-                <h3 className="font-bold text-lg">{caseContext ? 'AI Case Assistant' : 'Legal AI Assistant'}</h3>
+                <h3 className="font-bold text-lg">{caseContext ? t.chatbot.caseAssistant : t.chatbot.legalAssistant}</h3>
                 <button onClick={onClose} className="p-2 rounded-full text-[rgb(var(--muted-foreground))] hover:bg-[rgb(var(--muted))]">
                     <CloseIcon className="w-6 h-6" />
                 </button>
@@ -114,7 +116,7 @@ export const Chatbot: React.FC<ChatbotProps> = ({ onClose, caseContext }) => {
                         value={input}
                         onChange={(e) => setInput(e.target.value)}
                         onKeyPress={handleKeyPress}
-                        placeholder="Ask a question..."
+                        placeholder={t.chatbot.placeholder}
                         className="flex-1 bg-[rgb(var(--muted))] border border-[rgb(var(--border))] rounded-full px-4 py-2 focus:ring-2 focus:ring-[rgb(var(--ring))] focus:outline-none"
                     />
                     <button onClick={handleSend} disabled={!input.trim() || isLoading} className="bg-[rgb(var(--primary))] text-white p-3 rounded-full hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed">

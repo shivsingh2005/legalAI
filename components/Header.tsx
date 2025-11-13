@@ -6,6 +6,8 @@ import type { Theme, UserRole } from '../types';
 import { FEATURE_FLAGS } from '../featureFlags';
 import { BellIcon } from './icons/BellIcon';
 import { Notifications } from './addons/Notifications';
+import { useTranslations } from '../hooks/useTranslations';
+import { LanguageSelector } from './LanguageSelector';
 
 
 interface HeaderProps {
@@ -17,17 +19,14 @@ interface HeaderProps {
 
 export const Header: React.FC<HeaderProps> = ({ userRole, handleLogout, theme, setTheme }) => {
     const [showNotifications, setShowNotifications] = useState(false);
+    const t = useTranslations();
     
     const toggleTheme = () => {
         setTheme(theme === 'light' ? 'dark' : 'light');
     };
 
     const getRoleTitle = (role: UserRole) => {
-        switch (role) {
-            case 'citizen': return 'Citizen';
-            case 'advocate': return 'Advocate';
-            case 'judge': return 'Judge';
-        }
+        return t.roles[role];
     }
 
     const getInitials = (role: UserRole) => {
@@ -43,9 +42,10 @@ export const Header: React.FC<HeaderProps> = ({ userRole, handleLogout, theme, s
             <div className="container mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex items-center justify-between h-16">
                     <div className="flex items-center">
-                        <h1 className="text-xl font-semibold text-[rgb(var(--foreground))]">AI Legal Intelligence Hub</h1>
+                        <h1 className="text-xl font-semibold text-[rgb(var(--foreground))]">{t.header.title}</h1>
                     </div>
                     <div className="flex items-center space-x-2 sm:space-x-4">
+                        <LanguageSelector />
                         <button
                             onClick={toggleTheme}
                             className="p-2 rounded-full text-[rgb(var(--muted-foreground))] hover:bg-[rgb(var(--muted))] hover:text-[rgb(var(--foreground))] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[rgb(var(--background))] focus:ring-[rgb(var(--ring))]"
@@ -73,7 +73,7 @@ export const Header: React.FC<HeaderProps> = ({ userRole, handleLogout, theme, s
 
                          <div className="flex items-center space-x-3">
                             <div className="hidden sm:block text-right">
-                                <div className="font-medium text-sm text-[rgb(var(--foreground))]">Welcome</div>
+                                <div className="font-medium text-sm text-[rgb(var(--foreground))]">{t.header.welcome}</div>
                                 <div className="text-xs text-[rgb(var(--muted-foreground))]">{getRoleTitle(userRole)}</div>
                             </div>
                             <div className="h-10 w-10 bg-slate-300 dark:bg-slate-700 rounded-full flex items-center justify-center font-bold text-slate-500 dark:text-slate-300 border-2 border-white dark:border-slate-800">
@@ -84,7 +84,7 @@ export const Header: React.FC<HeaderProps> = ({ userRole, handleLogout, theme, s
                             onClick={handleLogout}
                             className="px-3 py-2 text-sm font-medium rounded-md text-[rgb(var(--muted-foreground))] hover:bg-[rgb(var(--muted))] hover:text-[rgb(var(--foreground))] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[rgb(var(--background))] focus:ring-[rgb(var(--ring))]"
                         >
-                            Logout
+                            {t.header.logout}
                         </button>
                     </div>
                 </div>
