@@ -1,10 +1,11 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import { DisputeInputForm } from './DisputeInputForm';
 import { ResultsDisplay } from './ResultsDisplay';
 import { analyzeDispute } from '../services/geminiService';
 import type { CitizenAnalysisResult, RecommendedLawyer } from '../types';
 import { Chatbot } from './Chatbot';
 import { ChatBubbleIcon } from './icons/ChatBubbleIcon';
+import { UsersIcon } from './icons/UsersIcon';
 
 export const CitizenDashboard: React.FC = () => {
   const [analysisResult, setAnalysisResult] =
@@ -12,6 +13,7 @@ export const CitizenDashboard: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isChatbotOpen, setIsChatbotOpen] = useState(false);
+  const resultsRef = useRef<{ scrollToLawyers: () => void }>(null);
 
   const handleAnalyze = useCallback(async (disputeText: string) => {
     if (!disputeText.trim()) {
@@ -43,18 +45,37 @@ export const CitizenDashboard: React.FC = () => {
     );
   };
 
+  const handleScrollToLawyers = () => {
+    resultsRef.current?.scrollToLawyers();
+  };
+
   return (
     <div>
-      <h1 className="text-3xl font-bold text-[rgb(var(--foreground))] mb-2">
-        Citizen Dashboard
-      </h1>
-      <p className="text-lg text-[rgb(var(--muted-foreground))] mb-6">
-        Get an AI-powered analysis of your legal issue.
-      </p>
+       <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 mb-6">
+        <div>
+          <h1 className="text-3xl font-bold text-[rgb(var(--foreground))] mb-2">
+            Citizen Dashboard
+          </h1>
+          <p className="text-lg text-[rgb(var(--muted-foreground))]">
+            Get an AI-powered analysis of your legal issue.
+          </p>
+        </div>
+        {analysisResult && (
+          <button
+            onClick={handleScrollToLawyers}
+            className="flex-shrink-0 flex items-center gap-2 px-4 py-2 bg-[rgb(var(--card))] text-[rgb(var(--secondary-foreground))] font-semibold rounded-md hover:bg-[rgb(var(--muted))] transition-colors shadow-custom border border-[rgb(var(--border))]"
+            aria-label="Scroll to recommended lawyers"
+          >
+            <UsersIcon className="w-5 h-5 text-[rgb(var(--primary))]"/>
+            View Recommended Lawyers
+          </button>
+        )}
+      </div>
 
       <DisputeInputForm onAnalyze={handleAnalyze} isLoading={isLoading} />
 
       <ResultsDisplay
+        ref={resultsRef}
         result={analysisResult}
         isLoading={isLoading}
         error={error}

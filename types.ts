@@ -27,7 +27,7 @@ export interface CitizenAnalysisResult {
   legal_domain: string;
   primary_issue: string;
   legal_summary: string;
-  probable_remedy: string;
+  probable_remedy: string[];
   suggested_lawyer_type: string;
   recommended_lawyers: RecommendedLawyer[];
   lawyer_request_summary: string;

@@ -4,6 +4,7 @@ import { LoginPage } from './components/LoginPage';
 import { JudgeDashboard } from './components/JudgeDashboard';
 import { AdvocateDashboard } from './components/AdvocateDashboard';
 import { CitizenDashboard } from './components/CitizenDashboard';
+import { CaseFiling } from './components/CaseFiling';
 // FIX: Import shared types from the centralized types.ts file.
 import type { UserRole, ViewType, Theme } from './types';
 
@@ -40,7 +41,13 @@ export default function App() {
       case 'advocate':
         return <AdvocateDashboard />;
       case 'citizen':
-        return <CitizenDashboard />;
+        switch (activeView) {
+          case 'case_filing':
+            return <CaseFiling />;
+          case 'dashboard':
+          default:
+            return <CitizenDashboard />;
+        }
       default:
         return <div>Invalid role selected.</div>;
     }

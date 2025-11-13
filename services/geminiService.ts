@@ -61,7 +61,7 @@ export const analyzeDispute = async (
   2.  "legal_domain": The primary area of Indian law involved (e.g., "Property Law", "Negotiable Instruments Act, 1881", "Consumer Protection Act, 2019").
   3.  "primary_issue": A concise statement of the main legal issue.
   4.  "legal_summary": A brief, easy-to-understand summary of the situation from a legal perspective.
-  5.  "probable_remedy": The most likely legal remedy or next step for the user (e.g., "Send a legal notice", "File a consumer complaint", "Initiate mediation").
+  5.  "probable_remedy": An array of strings outlining the next steps for the user. Provide at least 2-3 clear, actionable steps in order. For example: ["Send a formal legal notice to the opposing party.", "If no response, file a complaint on the consumer portal.", "Prepare all relevant documents like receipts and communication records."].
   6.  "suggested_lawyer_type": The type of lawyer best suited for this case (e.g., "Civil Lawyer specializing in Property Disputes", "Corporate Lawyer").
   7.  "recommended_lawyers": An array of 3 fictional but realistic-looking lawyers. Each object should have "name", "specialization", "experience_years" (number), "success_rate" (string like "92%"), "location" (major Indian city), "profile_id" (a unique string), and "contact_option" ("Send Request").
   8.  "lawyer_request_summary": A one-paragraph summary of the case to be sent to a lawyer.
@@ -84,7 +84,10 @@ export const analyzeDispute = async (
           legal_domain: { type: Type.STRING },
           primary_issue: { type: Type.STRING },
           legal_summary: { type: Type.STRING },
-          probable_remedy: { type: Type.STRING },
+          probable_remedy: {
+            type: Type.ARRAY,
+            items: { type: Type.STRING },
+          },
           suggested_lawyer_type: { type: Type.STRING },
           recommended_lawyers: {
             type: Type.ARRAY,
