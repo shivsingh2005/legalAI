@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { LanguagesIcon } from './icons/LanguagesIcon';
 import { ExternalLinkIcon } from './icons/ExternalLinkIcon';
 
-type Language = 'en' | 'hi' | 'ta';
+type Language = 'en' | 'hi' | 'ta' | 'bn' | 'mr' | 'te' | 'kn';
 type CaseTypeKey = 'consumer' | 'property' | 'family' | 'cheque' | 'otherCivil';
 
 const translations = {
@@ -77,6 +77,102 @@ const translations = {
       cheque: 'காசோலை பவுன்ஸ் / நிதி',
       otherCivil: 'மற்ற சிவில் வழக்கு',
     }
+  },
+  bn: {
+    title: "একটি নতুন মামলা ফাইল করুন",
+    description: "অনুগ্রহ করে নিচে আপনার বিবরণ পূরণ করুন। জমা দেওয়ার পরে, আপনার মামলার ধরণের উপর ভিত্তি করে আপনাকে প্রাসঙ্গিক ই-ফাইলিং পোর্টালে লিঙ্ক সরবরাহ করা হবে।",
+    fullNameLabel: "পুরো নাম",
+    fullNamePlaceholder: "যেমন, রোহন শর্মা",
+    addressLabel: "সম্পূর্ণ ঠিকানা",
+    addressPlaceholder: "আপনার সম্পূর্ণ আবাসিক ঠিকানা লিখুন",
+    phoneLabel: "ফোন নম্বর",
+    emailLabel: "ইমেল ঠিকানা",
+    emailPlaceholder: "যেমন, user@example.com",
+    caseTypeLabel: "মামলার ধরণ",
+    caseTypeDefault: "একটি মামলার ধরণ নির্বাচন করুন",
+    submitButton: "ফাইলিং পোর্টাল খুঁজুন",
+    formSubmittedTitle: "ই-ফাইলিং পোর্টাল লিঙ্ক",
+    formSubmittedDescription: "আপনার নির্বাচনের উপর ভিত্তি করে, এখানে আপনার মামলা অনলাইনে ফাইল করার জন্য প্রস্তাবিত পোর্টালগুলি রয়েছে। এগিয়ে যাওয়ার আগে আপনার কাছে সমস্ত প্রয়োজনীয় নথি আছে তা নিশ্চিত করুন।",
+    noLinks: "প্রাসঙ্গিক লিঙ্ক দেখতে একটি বৈধ মামলার ধরণ নির্বাচন করুন।",
+    caseTypes: {
+      consumer: 'ভোক্তা বিরোধ',
+      property: 'সম্পত্তি বিরোধ',
+      family: 'পারিবারিক বিষয়',
+      cheque: 'চেক বাউন্স / আর্থিক',
+      otherCivil: 'অন্যান্য দেওয়ানী বিষয়',
+    }
+  },
+  mr: {
+    title: "नवीन केस दाखल करा",
+    description: "कृपया खाली आपले तपशील भरा. सबमिट केल्यानंतर, आपल्या केसच्या प्रकारानुसार आपल्याला संबंधित ई-फाइलिंग पोर्टलच्या लिंक प्रदान केल्या जातील.",
+    fullNameLabel: "पूर्ण नाव",
+    fullNamePlaceholder: "उदा., रोहन शर्मा",
+    addressLabel: "पूर्ण पत्ता",
+    addressPlaceholder: "तुमचा पूर्ण निवासी पत्ता प्रविष्ट करा",
+    phoneLabel: "फोन नंबर",
+    emailLabel: "ईमेल पत्ता",
+    emailPlaceholder: "उदा., user@example.com",
+    caseTypeLabel: "केसचा प्रकार",
+    caseTypeDefault: "केसचा प्रकार निवडा",
+    submitButton: "फाइलिंग पोर्टल शोधा",
+    formSubmittedTitle: "ई-फाइलिंग पोर्टल लिंक्स",
+    formSubmittedDescription: "तुमच्या निवडीनुसार, तुमची केस ऑनलाइन दाखल करण्यासाठी येथे शिफारस केलेले पोर्टल आहेत. पुढे जाण्यापूर्वी तुमच्याकडे सर्व आवश्यक कागदपत्रे असल्याची खात्री करा.",
+    noLinks: "संबंधित लिंक्स पाहण्यासाठी कृपया वैध केसचा प्रकार निवडा.",
+    caseTypes: {
+      consumer: 'ग्राहक विवाद',
+      property: 'मालमत्ता विवाद',
+      family: 'कौटुंबिक प्रकरण',
+      cheque: 'चेक बाऊन्स / आर्थिक',
+      otherCivil: 'इतर दिवाणी प्रकरण',
+    }
+  },
+  te: {
+    title: "కొత్త కేసును ఫైల్ చేయండి",
+    description: "దయచేసి మీ వివరాలను క్రింద పూరించండి. సమర్పించిన తర్వాత, మీ కేసు రకాన్ని బట్టి సంబంధిత ఇ-ఫైలింగ్ పోర్టల్‌లకు లింకులు మీకు అందించబడతాయి.",
+    fullNameLabel: "పూర్తి పేరు",
+    fullNamePlaceholder: "ఉదా., రోహన్ శర్మ",
+    addressLabel: "పూర్తి చిరునామా",
+    addressPlaceholder: "మీ పూర్తి నివాస చిరునామాను నమోదు చేయండి",
+    phoneLabel: "ఫోన్ నంబర్",
+    emailLabel: "ఇమెయిల్ చిరునామా",
+    emailPlaceholder: "ఉదా., user@example.com",
+    caseTypeLabel: "కేసు రకం",
+    caseTypeDefault: "కేసు రకాన్ని ఎంచుకోండి",
+    submitButton: "ఫైలింగ్ పోర్టల్‌లను కనుగొనండి",
+    formSubmittedTitle: "ఇ-ఫైలింగ్ పోర్టల్ లింకులు",
+    formSubmittedDescription: "మీ ఎంపిక ఆధారంగా, మీ కేసును ఆన్‌లైన్‌లో ఫైల్ చేయడానికి ఇక్కడ సిఫార్సు చేయబడిన పోర్టల్‌లు ఉన్నాయి. కొనసాగే ముందు మీ వద్ద అవసరమైన అన్ని పత్రాలు ఉన్నాయని నిర్ధారించుకోండి.",
+    noLinks: "సంబంధిత లింక్‌లను చూడటానికి దయచేసి చెల్లుబాటు అయ్యే కేసు రకాన్ని ఎంచుకోండి.",
+    caseTypes: {
+      consumer: 'వినియోగదారుల వివాదం',
+      property: 'ఆస్తి వివాదం',
+      family: 'కుటుంబ విషయం',
+      cheque: 'చెక్ బౌన్స్ / ఆర్థిక',
+      otherCivil: 'ఇతర సివిల్ విషయం',
+    }
+  },
+  kn: {
+    title: "ಹೊಸ ಪ್ರಕರಣವನ್ನು ದಾಖಲಿಸಿ",
+    description: "ದಯವಿಟ್ಟು ನಿಮ್ಮ ವಿವರಗಳನ್ನು ಕೆಳಗೆ ಭರ್ತಿ ಮಾಡಿ. ಸಲ್ಲಿಸಿದ ನಂತರ, ನಿಮ್ಮ ಪ್ರಕರಣದ ಪ್ರಕಾರವನ್ನು ಆಧರಿಸಿ ಸಂಬಂಧಿತ ಇ-ಫೈಲಿಂಗ್ ಪೋರ್ಟಲ್‌ಗಳಿಗೆ ಲಿಂಕ್‌ಗಳನ್ನು ನಿಮಗೆ ಒದಗಿಸಲಾಗುತ್ತದೆ.",
+    fullNameLabel: "ಪೂರ್ಣ ಹೆಸರು",
+    fullNamePlaceholder: "ಉದಾ., ರೋಹನ್ ಶರ್ಮಾ",
+    addressLabel: "ಪೂರ್ಣ ವಿಳಾಸ",
+    addressPlaceholder: "ನಿಮ್ಮ ಸಂಪೂರ್ಣ ವಸತಿ ವಿಳಾಸವನ್ನು ನಮೂದಿಸಿ",
+    phoneLabel: "ದೂರವಾಣಿ ಸಂಖ್ಯೆ",
+    emailLabel: "ಇಮೇಲ್ ವಿಳಾಸ",
+    emailPlaceholder: "ಉದಾ., user@example.com",
+    caseTypeLabel: "ಪ್ರಕರಣದ ಪ್ರಕಾರ",
+    caseTypeDefault: "ಪ್ರಕರಣದ ಪ್ರಕಾರವನ್ನು ಆಯ್ಕೆಮಾಡಿ",
+    submitButton: "ಫೈಲಿಂಗ್ ಪೋರ್ಟಲ್‌ಗಳನ್ನು ಹುಡುಕಿ",
+    formSubmittedTitle: "ಇ-ಫೈಲಿಂಗ್ ಪೋರ್ಟಲ್ ಲಿಂಕ್‌ಗಳು",
+    formSubmittedDescription: "ನಿಮ್ಮ ಆಯ್ಕೆಯ ಆಧಾರದ ಮೇಲೆ, ನಿಮ್ಮ ಪ್ರಕರಣವನ್ನು ಆನ್‌ಲೈನ್‌ನಲ್ಲಿ ದಾಖಲಿಸಲು ಇಲ್ಲಿ ಶಿಫಾರಸು ಮಾಡಲಾದ ಪೋರ್ಟಲ್‌ಗಳಿವೆ. ಮುಂದುವರಿಯುವ ಮೊದಲು ನಿಮ್ಮ ಬಳಿ ಎಲ್ಲಾ ಅಗತ್ಯ ದಾಖಲೆಗಳಿವೆ ಎಂದು ಖಚಿತಪಡಿಸಿಕೊಳ್ಳಿ.",
+    noLinks: "ಸಂಬಂಧಿತ ಲಿಂಕ್‌ಗಳನ್ನು ನೋಡಲು ದಯವಿಟ್ಟು ಮಾನ್ಯವಾದ ಪ್ರಕರಣದ ಪ್ರಕಾರವನ್ನು ಆಯ್ಕೆಮಾಡಿ.",
+    caseTypes: {
+      consumer: 'ಗ್ರಾಹಕ ವ್ಯಾಜ್ಯ',
+      property: 'ಆಸ್ತಿ ವ್ಯಾಜ್ಯ',
+      family: 'ಕುಟುಂಬ ವಿಷಯ',
+      cheque: 'ಚೆಕ್ ಬೌನ್ಸ್ / ಹಣಕಾಸು',
+      otherCivil: 'ಇತರೆ ಸಿವಿಲ್ ಪ್ರಕರಣ',
+    }
   }
 };
 
@@ -140,6 +236,10 @@ export const CaseFiling: React.FC = () => {
                         <option value="en">English</option>
                         <option value="hi">हिन्दी</option>
                         <option value="ta">தமிழ்</option>
+                        <option value="bn">বাংলা</option>
+                        <option value="mr">मराठी</option>
+                        <option value="te">తెలుగు</option>
+                        <option value="kn">ಕನ್ನಡ</option>
                     </select>
                 </div>
             </div>
