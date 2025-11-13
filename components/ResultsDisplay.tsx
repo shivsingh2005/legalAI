@@ -31,7 +31,7 @@ const InfoCard: React.FC<{ title: string; value: string; urgency?: string }> = (
   const { icon, color } = getUrgencyStyles();
   
   return (
-      <div className="bg-[rgb(var(--muted))] p-4 rounded-lg">
+      <div className="bg-[rgb(var(--muted))] p-4 rounded-lg border border-[rgb(var(--border))]">
           <h4 className="text-sm font-semibold text-[rgb(var(--muted-foreground))]">{title}</h4>
           <p className={`text-base font-bold flex items-center mt-1 ${color}`}>
             {icon}
@@ -45,7 +45,7 @@ const InfoCard: React.FC<{ title: string; value: string; urgency?: string }> = (
 export const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ result, isLoading, error, onSendRequest }) => {
   if (isLoading) {
     return (
-      <div className="bg-[rgb(var(--card))] p-6 rounded-lg shadow-lg text-center">
+      <div className="bg-[rgb(var(--card))] p-6 rounded-xl shadow-custom border border-[rgb(var(--border))] text-center">
         <div className="flex justify-center items-center gap-4">
           <Spinner />
           <p className="text-lg text-[rgb(var(--muted-foreground))]">AI is analyzing your case. This may take a moment...</p>
@@ -56,7 +56,7 @@ export const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ result, isLoadin
 
   if (error) {
     return (
-      <div className="bg-red-500/10 border border-red-500/20 text-red-500 px-4 py-3 rounded-lg shadow-lg" role="alert">
+      <div className="bg-red-500/10 border border-red-500/20 text-red-500 px-4 py-3 rounded-xl shadow-custom" role="alert">
         <strong className="font-bold">Error: </strong>
         <span className="block sm:inline">{error}</span>
       </div>
@@ -68,8 +68,8 @@ export const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ result, isLoadin
   }
   
   return (
-    <div className="bg-[rgb(var(--card))] p-6 rounded-lg shadow-lg">
-      <h2 className="text-2xl font-bold text-[rgb(var(--card-foreground))] mb-4">Case Analysis & Recommendations</h2>
+    <div className="bg-[rgb(var(--card))] p-6 rounded-xl shadow-custom-lg border border-[rgb(var(--border))]">
+      <h2 className="text-2xl font-bold text-[rgb(var(--card-foreground))] mb-6">Case Analysis & Recommendations</h2>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <InfoCard title="Case Classification" value={result.case_classification} />
@@ -80,7 +80,7 @@ export const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ result, isLoadin
 
       <div className="mt-6 border-t border-[rgb(var(--border))] pt-6">
         <h3 className="text-lg font-semibold text-[rgb(var(--card-foreground))] mb-2">Legal Summary</h3>
-        <p className="text-[rgb(var(--foreground))] bg-[rgb(var(--muted))] p-4 rounded-md">{result.legal_summary}</p>
+        <p className="text-[rgb(var(--foreground))] bg-[rgb(var(--muted))] p-4 rounded-md border border-[rgb(var(--border))]">{result.legal_summary}</p>
       </div>
 
       <div className="mt-6">

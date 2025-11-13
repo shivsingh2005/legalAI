@@ -4,10 +4,8 @@ import { LoginPage } from './components/LoginPage';
 import { JudgeDashboard } from './components/JudgeDashboard';
 import { AdvocateDashboard } from './components/AdvocateDashboard';
 import { CitizenDashboard } from './components/CitizenDashboard';
-
-export type UserRole = 'citizen' | 'advocate' | 'judge';
-export type ViewType = 'dashboard' | 'search' | 'builder' | 'analytics' | 'workspace' | 'case_filing';
-export type Theme = 'light' | 'dark';
+// FIX: Import shared types from the centralized types.ts file.
+import type { UserRole, ViewType, Theme } from './types';
 
 export default function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);

@@ -1,7 +1,8 @@
 import React from 'react';
 import { Header } from './Header';
 import { Sidebar } from './Sidebar';
-import type { ViewType, Theme, UserRole } from '../App';
+// FIX: Import shared types from the centralized types.ts file.
+import type { ViewType, Theme, UserRole } from '../types';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -20,7 +21,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, user
       <div className="flex-1 flex flex-col overflow-hidden">
         <Header userRole={userRole} handleLogout={handleLogout} theme={theme} setTheme={setTheme} />
         <main className="flex-1 overflow-x-hidden overflow-y-auto bg-[rgb(var(--background))]">
-          <div className="container mx-auto px-6 py-8">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
             {children}
           </div>
         </main>

@@ -1,366 +1,412 @@
-import { GoogleGenAI, Type, Chat } from "@google/genai";
-import type { RAGResult, PrecedentAnalysisResult, CitizenAnalysisResult, SimilarCaseAnalysisResult, AIResearchPipelineResult } from '../types';
+import { GoogleGenAI, Type, Chat } from '@google/genai';
+import type {
+  RAGResult,
+  CitizenAnalysisResult,
+  PrecedentAnalysisResult,
+  SimilarCaseAnalysisResult,
+  CaseChatMessage,
+  AIResearchPipelineResult,
+  LegalDraftType,
+  BiasAnalysisResult,
+  NextStepsResponse,
+} from '../types';
 
-const API_KEY = process.env.API_KEY;
+// FIX: Initialize Gemini AI Client according to coding guidelines.
+const ai = new GoogleGenAI({ apiKey: process.env.API_KEY! });
 
-if (!API_KEY) {
-  throw new Error("API_KEY environment variable not set");
-}
-
-const ai = new GoogleGenAI({ apiKey: API_KEY });
-
-// Schema for Citizen's Case Analysis
-const citizenAnalysisSchema = {
-    type: Type.OBJECT,
-    properties: {
-        case_classification: { type: Type.STRING, description: "Classification of the case (e.g., Traffic Violation, Civil Dispute, Consumer Complaint, Criminal Case, Property Dispute)." },
-        legal_domain: { type: Type.STRING, description: "The relevant Indian legal act or domain (e.g., Motor Vehicle Act 1988, Consumer Protection Act 2019)." },
-        primary_issue: { type: Type.STRING, description: "A one-sentence description of the core legal problem." },
-        legal_summary: { type: Type.STRING, description: "3-5 sentences explaining the background, possible laws involved, and citizen rights under Indian law." },
-        probable_remedy: { type: Type.STRING, description: "Detailed explanation of what the citizen can do (online/offline process, where to file, required documents)." },
-        suggested_lawyer_type: { type: Type.STRING, description: "The specific type of Indian lawyer to consult (e.g., 'Traffic Lawyer', 'Consumer Court Advocate')." },
-        recommended_lawyers: {
-            type: Type.ARRAY,
-            description: "A list of the top 3 recommended lawyers (mock data).",
-            items: {
-                type: Type.OBJECT,
-                properties: {
-                    name: { type: Type.STRING },
-                    specialization: { type: Type.STRING },
-                    experience_years: { type: Type.INTEGER },
-                    success_rate: { type: Type.STRING },
-                    location: { type: Type.STRING },
-                    profile_id: { type: Type.STRING },
-                    contact_option: { type: Type.STRING, description: "Must be 'Send Request'." }
-                },
-                required: ["name", "specialization", "experience_years", "success_rate", "location", "profile_id", "contact_option"]
-            }
-        },
-        lawyer_request_summary: { type: Type.STRING, description: "A compact, professional case request note to be sent to the selected lawyer." },
-        urgency: { type: Type.STRING, description: "The urgency level: 'Low', 'Medium', or 'High'." },
-        portal_recommendation: { type: Type.STRING, description: "A relevant government portal or authority link if applicable (e.g., 'Visit parivahan.gov.in'). State 'N/A' if not applicable." },
-    },
-    required: ["case_classification", "legal_domain", "primary_issue", "legal_summary", "probable_remedy", "suggested_lawyer_type", "recommended_lawyers", "lawyer_request_summary", "urgency", "portal_recommendation"]
-};
-
-const similarCaseAnalyzerSchema = {
-    type: Type.OBJECT,
-    properties: {
-        role: { type: Type.STRING, description: "Should always be 'Advocate'." },
-        feature: { type: Type.STRING, description: "Should always be 'Similar Case Analyzer'." },
-        case_context_summary: { type: Type.STRING, description: "A brief summary of the user's provided case context." },
-        similar_cases_found: {
-            type: Type.ARRAY,
-            description: "A list of 3 relevant, concluded Indian court judgments.",
-            items: {
-                type: Type.OBJECT,
-                properties: {
-                    case_title: { type: Type.STRING, description: "The full title of the case (e.g., 'K. Bhaskaran v. Sankaran Vaidhyan Balan')." },
-                    citation_or_year: { type: Type.STRING, description: "The legal citation or year of the judgment (e.g., '1999 (7) SCC 510')." },
-                    court_name: { type: Type.STRING, description: "The court that delivered the judgment (e.g., 'Supreme Court of India')." },
-                    summary_of_decision: { type: Type.STRING, description: "A concise summary of the court's final decision or ruling." },
-                    relevance_score: { type: Type.NUMBER, description: "A numerical score from 0.0 to 1.0 indicating the relevance to the user's query." },
-                    key_sections_cited: { type: Type.ARRAY, items: { type: Type.STRING }, description: "List of key legal sections or acts cited in the judgment." },
-                    legal_takeaway: { type: Type.STRING, description: "The primary legal principle or takeaway from the judgment that is relevant to the advocate." }
-                },
-                required: ["case_title", "citation_or_year", "court_name", "summary_of_decision", "relevance_score", "key_sections_cited", "legal_takeaway"]
-            }
-        },
-        overall_summary: { type: Type.STRING, description: "A concluding summary of the findings." },
-        suggested_action: { type: Type.STRING, description: "A suggested next step for the advocate, like citing the cases." }
-    },
-    required: ["role", "feature", "case_context_summary", "similar_cases_found", "overall_summary", "suggested_action"]
-};
-
-const aiResearchPipelineSchema = {
-    type: Type.OBJECT,
-    properties: {
-        pipeline_stage: { type: Type.STRING, description: "Should be 'Complete'." },
-        case_context: { type: Type.STRING, description: "A one-sentence summary of the original case facts provided by the advocate." },
-        similar_cases: {
-            type: Type.ARRAY,
-            items: {
-                type: Type.OBJECT,
-                properties: {
-                    case_title: { type: Type.STRING },
-                    court_name: { type: Type.STRING },
-                    citation: { type: Type.STRING },
-                    relevance_score: { type: Type.NUMBER }
-                },
-                required: ["case_title", "court_name", "citation", "relevance_score"]
-            },
-            description: "A summarized list of the most relevant cases found in the previous pipeline stage."
-        },
-        rag_results: {
-            type: Type.ARRAY,
-            items: {
-                type: Type.OBJECT,
-                properties: {
-                    section: { type: Type.STRING },
-                    summary: { type: Type.STRING }
-                },
-                required: ["section", "summary"]
-            },
-            description: "A summarized list of relevant statutes or precedents from the RAG search."
-        },
-        final_summary: { type: Type.STRING, description: "A synthesized, expert legal summary combining insights from both similar cases and RAG results, explaining the legal standing of the case." },
-        argument_suggestion: { type: Type.STRING, description: "A concise, actionable suggestion for the primary legal argument the advocate should pursue." }
-    },
-    required: ["pipeline_stage", "case_context", "similar_cases", "rag_results", "final_summary", "argument_suggestion"]
-};
-
-
-export async function getCitizenCaseAnalysis(userInput: string): Promise<CitizenAnalysisResult> {
-    const model = 'gemini-2.5-pro';
-    const systemInstruction = `You are an advanced AI assistant integrated into an "AI-Driven Judicial Precedent & Case Management Ecosystem" built for India. Your module is specifically for the Citizen/User section. Your job is to analyze user queries, provide a detailed, India-specific legal case analysis, recommend lawyers, and generate a lawyer-hiring request summary. You must return a complete, structured JSON output. Always tailor your answers to Indian legal frameworks. Use accurate, verified references. Write in simple, professional, citizen-friendly English. The output must strictly follow the provided JSON schema. For the 'recommended_lawyers' field, you must generate realistic mock data for three lawyers.`;
-
-    const prompt = `User's legal problem: "${userInput}"`;
-
+// FIX: Add helper to parse JSON from model's markdown response, making it more robust.
+/**
+ * Parses a JSON object from a markdown code block in a string.
+ * It first tries to find a markdown block, and if not found, tries to parse the whole string.
+ * @param markdown The string containing the markdown code block.
+ * @returns The parsed JSON object.
+ * @throws An error if the JSON is invalid or not found.
+ */
+const parseJsonFromMarkdown = <T>(markdown: string): T => {
+  const trimmedMarkdown = markdown.trim();
+  // Look for a JSON code block (with or without 'json' language identifier)
+  const jsonMatch = trimmedMarkdown.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
+  if (jsonMatch && jsonMatch[1]) {
     try {
-        const response = await ai.models.generateContent({
-            model,
-            contents: prompt,
-            config: {
-                systemInstruction,
-                responseMimeType: "application/json",
-                responseSchema: citizenAnalysisSchema,
-                temperature: 0.3,
-            },
-        });
-        const jsonText = response.text.trim();
-        return JSON.parse(jsonText) as CitizenAnalysisResult;
-    } catch (error) {
-        console.error("Error in Gemini citizen case analysis:", error);
-        throw new Error("Failed to get a valid case analysis from the AI model.");
+      return JSON.parse(jsonMatch[1]);
+    } catch (e) {
+      console.error('Failed to parse JSON from markdown:', jsonMatch[1]);
+      throw new Error('Invalid JSON response from model.');
     }
-}
+  }
+  // If no code block, try to parse the whole string as JSON
+  try {
+    return JSON.parse(trimmedMarkdown);
+  } catch (e) {
+    console.error('Failed to parse the entire string as JSON:', trimmedMarkdown);
+    throw new Error('Invalid response from model. Expected a JSON object.');
+  }
+};
 
-export async function getSimilarCases(caseFacts: string): Promise<SimilarCaseAnalysisResult> {
-    const model = 'gemini-2.5-pro';
-    const systemInstruction = `You are an AI Legal Research Assistant for the Advocate Dashboard of an "AI-Driven Judicial Precedent & Case Management Ecosystem" in India. Your task is to analyze an advocate's case facts and return the most relevant, legally similar, concluded Indian court judgments. Understand the context, domain, and facts. Search conceptually for similar judgments, summarizing each one clearly. Output only real or plausible Indian judgments, focusing on landmark cases where possible. Your response must be professional, factual, and strictly follow the provided JSON schema.`;
+// Function for Citizen Dashboard
+export const analyzeDispute = async (
+  disputeText: string
+): Promise<CitizenAnalysisResult> => {
+  // FIX: Use gemini-2.5-pro for complex reasoning tasks
+  const model = 'gemini-2.5-pro';
+  const prompt = `Analyze the following legal dispute description and provide a structured JSON response.
+  
+  Dispute Description:
+  ---
+  ${disputeText}
+  ---
+  
+  Based on the Indian legal context, provide the following:
+  1.  "case_classification": A brief, high-level classification (e.g., "Civil - Property Dispute", "Criminal - Cheque Bounce", "Consumer Complaint").
+  2.  "legal_domain": The primary area of Indian law involved (e.g., "Property Law", "Negotiable Instruments Act, 1881", "Consumer Protection Act, 2019").
+  3.  "primary_issue": A concise statement of the main legal issue.
+  4.  "legal_summary": A brief, easy-to-understand summary of the situation from a legal perspective.
+  5.  "probable_remedy": The most likely legal remedy or next step for the user (e.g., "Send a legal notice", "File a consumer complaint", "Initiate mediation").
+  6.  "suggested_lawyer_type": The type of lawyer best suited for this case (e.g., "Civil Lawyer specializing in Property Disputes", "Corporate Lawyer").
+  7.  "recommended_lawyers": An array of 3 fictional but realistic-looking lawyers. Each object should have "name", "specialization", "experience_years" (number), "success_rate" (string like "92%"), "location" (major Indian city), "profile_id" (a unique string), and "contact_option" ("Send Request").
+  8.  "lawyer_request_summary": A one-paragraph summary of the case to be sent to a lawyer.
+  9.  "urgency": Assess the urgency as "Low", "Medium", or "High".
+  10. "portal_recommendation": Suggest a relevant government portal if applicable (e.g., "National Consumer Helpline (consumerhelpline.gov.in)", "State RERA portal"), otherwise "N/A".
+  
+  Ensure the entire output is a single valid JSON object.
+  `;
 
-    const prompt = `Analyze the following case and return similar Indian judgments: "${caseFacts}"`;
-
-    try {
-        const response = await ai.models.generateContent({
-            model,
-            contents: prompt,
-            config: {
-                systemInstruction,
-                responseMimeType: "application/json",
-                responseSchema: similarCaseAnalyzerSchema,
-                temperature: 0.4,
+  // FIX: Use generateContent with responseMimeType and responseSchema for robust JSON
+  const response = await ai.models.generateContent({
+    model,
+    contents: prompt,
+    config: {
+      responseMimeType: 'application/json',
+      responseSchema: {
+        type: Type.OBJECT,
+        properties: {
+          case_classification: { type: Type.STRING },
+          legal_domain: { type: Type.STRING },
+          primary_issue: { type: Type.STRING },
+          legal_summary: { type: Type.STRING },
+          probable_remedy: { type: Type.STRING },
+          suggested_lawyer_type: { type: Type.STRING },
+          recommended_lawyers: {
+            type: Type.ARRAY,
+            items: {
+              type: Type.OBJECT,
+              properties: {
+                name: { type: Type.STRING },
+                specialization: { type: Type.STRING },
+                experience_years: { type: Type.INTEGER },
+                success_rate: { type: Type.STRING },
+                location: { type: Type.STRING },
+                profile_id: { type: Type.STRING },
+                contact_option: { type: Type.STRING },
+              },
+              required: [
+                'name',
+                'specialization',
+                'experience_years',
+                'success_rate',
+                'location',
+                'profile_id',
+                'contact_option',
+              ],
             },
-        });
-        const jsonText = response.text.trim();
-        return JSON.parse(jsonText) as SimilarCaseAnalysisResult;
-    } catch (error) {
-        console.error("Error in Gemini similar case analysis:", error);
-        throw new Error("Failed to find similar cases from the AI model.");
+          },
+          lawyer_request_summary: { type: Type.STRING },
+          urgency: { type: Type.STRING },
+          portal_recommendation: { type: Type.STRING },
+        },
+        required: [
+          'case_classification',
+          'legal_domain',
+          'primary_issue',
+          'legal_summary',
+          'probable_remedy',
+          'suggested_lawyer_type',
+          'recommended_lawyers',
+          'lawyer_request_summary',
+          'urgency',
+          'portal_recommendation',
+        ],
+      },
+    },
+  });
+
+  // FIX: Directly parse the text response as JSON
+  return JSON.parse(response.text);
+};
+
+// Function for Precedent Search
+export const performRAGSearch = async (
+  query: string,
+  documentText: string
+): Promise<RAGResult> => {
+  // FIX: Use gemini-2.5-flash for grounded Q&A tasks
+  const model = 'gemini-2.5-flash';
+  const prompt = `
+    Context Document:
+    ---
+    ${documentText}
+    ---
+    
+    Question: "${query}"
+    
+    Based ONLY on the context document provided, answer the question. Also, provide up to 3 direct quotes from the document that support your answer as citations.
+    
+    Format your response as a JSON object inside a markdown code block with the following structure:
+    {
+      "answer": "Your direct answer to the question.",
+      "citations": [
+        "Direct quote 1 from the document.",
+        "Direct quote 2 from the document.",
+        "Direct quote 3 from the document."
+      ]
     }
-}
+  `;
 
-export async function getAIResearchSummary(
-  caseFacts: string, 
-  similarCasesResult: SimilarCaseAnalysisResult, 
-  ragResult: RAGResult
-): Promise<AIResearchPipelineResult> {
-    const model = 'gemini-2.5-pro';
-    const systemInstruction = `You are an expert AI Legal Analyst for an Indian law firm. You have received inputs from two different AI research modules and your job is to synthesize them into a final, consolidated legal research summary for a senior advocate. The summary must be sharp, legally precise, and actionable. Strictly adhere to the provided JSON schema.`;
+  // FIX: Use standard generateContent and parse the JSON response
+  const response = await ai.models.generateContent({ model, contents: prompt });
+  return parseJsonFromMarkdown<RAGResult>(response.text);
+};
 
-    const prompt = `
-      ADVOCATE'S ORIGINAL CASE FACTS:
+// Function for Explainable AI
+export const getPrecedentAnalysis = async (
+  documentText: string
+): Promise<PrecedentAnalysisResult> => {
+  // FIX: Use gemini-2.5-pro for complex analysis
+  const model = 'gemini-2.5-pro';
+  const prompt = `
+      Analyze the following legal document (likely a court judgment) from an Indian legal perspective.
+  
+      Document:
+      ---
+      ${documentText}
+      ---
+  
+      Provide a detailed analysis in a JSON object format within a markdown code block. The JSON object should have the following keys:
+      1.  "keyArguments": An object with two keys, "plaintiff" and "defendant", containing a concise summary of the main arguments for each side as presented in the document.
+      2.  "influencingStatutes": An array of objects. Each object should represent a key statute or precedent cited and should have three keys: "statute" (the name of the law or case), "quote" (a brief, relevant quote from the document about it), and "relevance" (a short explanation of its importance to the case).
+      3.  "consistencyCheck": An array of objects. Identify any potential logical inconsistencies or contradictions in the judgment's reasoning. Each object should have "issue" (a brief title for the inconsistency) and "explanation" (a description of the inconsistency). If none are found, return an empty array.
+      4.  "biasDetection": An object with a single key "warning". Briefly state if any potential judicial bias (e.g., confirmation bias, gender bias) is apparent from the language used. If none, state "No potential bias detected in the provided text."
+    `;
+  // FIX: Use standard generateContent and parse the JSON response
+  const response = await ai.models.generateContent({ model, contents: prompt });
+  return parseJsonFromMarkdown<PrecedentAnalysisResult>(response.text);
+};
+
+// Function for Similar Case Analyzer
+export const getSimilarCases = async (
+  caseFacts: string
+): Promise<SimilarCaseAnalysisResult> => {
+  // FIX: Use gemini-2.5-pro for creative and analytical tasks
+  const model = 'gemini-2.5-pro';
+  const prompt = `
+      Analyze the following case facts from the perspective of an Indian advocate. Find 3-4 similar but fictional Indian case laws that would be relevant.
+  
+      Case Facts:
       ---
       ${caseFacts}
       ---
-      
-      STAGE 1 - SIMILAR CASE ANALYZER RESULTS:
+  
+      Provide the output as a JSON object inside a markdown block with the following structure:
+      {
+        "role": "Advocate",
+        "feature": "Similar Case Analyzer",
+        "case_context_summary": "A brief summary of the user's provided case facts.",
+        "similar_cases_found": [
+          {
+            "case_title": "Fictional Case Title (e.g., 'Rajesh Kumar vs. State of Delhi')",
+            "citation_or_year": "Fictional citation (e.g., 'AIR 2018 SC 1234' or '2019')",
+            "court_name": "Fictional Court Name (e.g., 'Supreme Court of India', 'High Court of Bombay')",
+            "summary_of_decision": "A concise summary of the fictional case's ruling.",
+            "relevance_score": a number between 0.70 and 0.99 representing relevance to the user's case,
+            "key_sections_cited": ["Section 138 NI Act", "Section 420 IPC"],
+            "legal_takeaway": "A one-sentence key legal principle derived from this case."
+          }
+        ],
+        "overall_summary": "A brief overall summary of what the similar cases suggest.",
+        "suggested_action": "A concrete next step for the advocate based on the findings."
+      }
+    `;
+  // FIX: Use standard generateContent and parse the JSON response
+  const response = await ai.models.generateContent({ model, contents: prompt });
+  return parseJsonFromMarkdown<SimilarCaseAnalysisResult>(response.text);
+};
+
+// Function for Case Chat Summary
+export const getChatSummary = async (
+  history: CaseChatMessage[]
+): Promise<string> => {
+  // FIX: Use gemini-2.5-flash for summarization
+  const model = 'gemini-2.5-flash';
+  const chatHistoryText = history.map((m) => `${m.role}: ${m.text}`).join('\n');
+  const prompt = `Summarize the following conversation between an advocate and a citizen. Be concise and focus on the key legal points and actions agreed upon.
+  
+  Conversation:
+  ---
+  ${chatHistoryText}
+  ---
+  
+  Summary:
+  `;
+
+  // FIX: Use generateContent and return the text property
+  const response = await ai.models.generateContent({ model, contents: prompt });
+  return response.text;
+};
+
+// Function for Case Chat Next Steps
+export const getSuggestedNextSteps = async (
+  history: CaseChatMessage[]
+): Promise<NextStepsResponse> => {
+  // FIX: Use gemini-2.5-flash for quick suggestions
+  const model = 'gemini-2.5-flash';
+  const chatHistoryText = history.map((m) => `${m.role}: ${m.text}`).join('\n');
+  const prompt = `
+    Based on the following chat between an advocate and a citizen, suggest 2-3 concrete next steps for the advocate.
+    If the advocate needs to ask for more information, provide a "clarification_needed" question instead of suggestions.
+    
+    Chat History:
+    ---
+    ${chatHistoryText}
+    ---
+    
+    Provide your response as a JSON object inside a markdown block with the following structure:
+    {
+      "suggestions": ["Step 1...", "Step 2..."] | null,
+      "clarification_needed": "Question to ask the citizen for more details." | null
+    }
+    
+    Only provide either suggestions OR a clarification question, not both.
+  `;
+
+  // FIX: Use standard generateContent and parse the JSON response
+  const response = await ai.models.generateContent({ model, contents: prompt });
+  return parseJsonFromMarkdown<NextStepsResponse>(response.text);
+};
+
+// Function for AI Research Hub
+export const getAIResearchSummary = async (
+  caseFacts: string,
+  similarCases: SimilarCaseAnalysisResult,
+  ragResult: RAGResult
+): Promise<AIResearchPipelineResult> => {
+  // FIX: Use gemini-2.5-pro for complex synthesis
+  const model = 'gemini-2.5-pro';
+  const prompt = `
+      You are an AI legal assistant. Synthesize the provided information into a final research summary for an advocate.
+  
+      1. Original Case Facts:
       ---
-      ${JSON.stringify(similarCasesResult.similar_cases_found, null, 2)}
+      ${caseFacts}
+      ---
+  
+      2. Similar Cases Found:
+      ---
+      ${JSON.stringify(similarCases.similar_cases_found, null, 2)}
       ---
       
-      STAGE 2 - RAG PRECEDENT SEARCH RESULTS:
+      3. Relevant Statutes from RAG search:
       ---
       ${JSON.stringify(ragResult, null, 2)}
       ---
-      
-      TASK:
-      Based on all the provided information, generate a final, consolidated AI Legal Research Summary.
-      1. Briefly summarize the advocate's original case context.
-      2. Extract and list the most critical similar cases, simplifying the data.
-      3. Extract and list the most relevant legal sections from the RAG results.
-      4. Write a 'final_summary' that connects the precedents and statutes to the advocate's case facts, providing a clear legal outlook.
-      5. Provide a sharp, one-sentence 'argument_suggestion' that the advocate can use as a starting point.
-      
-      Your output must be a valid JSON object matching the required schema.
+  
+      Based on all the above information, generate a final JSON object inside a markdown block with the following structure:
+      {
+        "pipeline_stage": "Complete",
+        "case_context": "A brief, one-paragraph summary of the original case facts.",
+        "similar_cases": [
+          {
+            "case_title": "Title from input",
+            "court_name": "Court from input",
+            "citation": "Citation from input",
+            "relevance_score": 0.85
+          }
+        ],
+        "rag_results": [
+          {
+            "section": "Statute/Section Name from RAG",
+            "summary": "Brief summary of the statute's relevance."
+          }
+        ],
+        "final_summary": "A comprehensive final summary synthesizing the findings from similar cases and RAG results, providing an outlook on the case strength.",
+        "argument_suggestion": "Suggest a single, powerful core argument the advocate should focus on."
+      }
     `;
 
-    try {
-        const response = await ai.models.generateContent({
-            model,
-            contents: prompt,
-            config: {
-                systemInstruction,
-                responseMimeType: "application/json",
-                responseSchema: aiResearchPipelineSchema,
-                temperature: 0.5,
-            },
-        });
-        const jsonText = response.text.trim();
-        return JSON.parse(jsonText) as AIResearchPipelineResult;
-    } catch (error) {
-        console.error("Error in Gemini research summary generation:", error);
-        throw new Error("Failed to generate the final AI research summary.");
-    }
-}
-
-
-// Schema for Advocate RAG search
-const ragSchema = {
-    type: Type.OBJECT,
-    properties: {
-        answer: {
-            type: Type.STRING,
-            description: "A concise, synthesized answer to the user's question based *only* on the provided context."
-        },
-        citations: {
-            type: Type.ARRAY,
-            description: "A list of direct quotes from the context that support the answer. Each quote should be a separate string.",
-            items: {
-                type: Type.STRING
-            }
-        }
-    },
-    required: ["answer", "citations"]
+  // FIX: Use standard generateContent and parse the JSON response
+  const response = await ai.models.generateContent({ model, contents: prompt });
+  return parseJsonFromMarkdown<AIResearchPipelineResult>(response.text);
 };
 
-// Schema for Judge's Explainable AI Analysis
-const precedentAnalysisSchema = {
-  type: Type.OBJECT,
-  properties: {
-    keyArguments: {
-      type: Type.OBJECT,
-      properties: {
-        plaintiff: { type: Type.STRING, description: "A concise summary of the plaintiff's core legal argument." },
-        defendant: { type: Type.STRING, description: "A concise summary of the defendant's core legal argument." },
-      },
-      required: ["plaintiff", "defendant"]
-    },
-    influencingStatutes: {
-      type: Type.ARRAY,
-      description: "The top 3-5 statutes, regulations, or precedents influencing the case.",
-      items: {
-        type: Type.OBJECT,
-        properties: {
-          statute: { type: Type.STRING, description: "The name or citation of the statute/precedent." },
-          quote: { type: Type.STRING, description: "A direct, relevant quote from the provided context." },
-          relevance: { type: Type.STRING, description: "A brief explanation of how this statute applies to the case." },
-        },
-        required: ["statute", "quote", "relevance"]
-      }
-    },
-    consistencyCheck: {
-      type: Type.ARRAY,
-      description: "Identified gaps or inconsistencies in legal reasoning.",
-      items: {
-        type: Type.OBJECT,
-        properties: {
-            issue: { type: Type.STRING, description: "The specific logical issue or gap found." },
-            explanation: { type: Type.STRING, description: "A brief explanation of the inconsistency." },
-        },
-        required: ["issue", "explanation"]
-      }
-    },
-    biasDetection: {
-      type: Type.OBJECT,
-      properties: {
-          warning: { type: Type.STRING, description: "A concise warning if any potential bias is detected in the language or arguments. If none, state 'No potential bias detected.'." }
-      },
-      required: ["warning"]
-    }
-  },
-  required: ["keyArguments", "influencingStatutes", "consistencyCheck", "biasDetection"]
-};
-
-
-export async function performRAGSearch(query: string, context: string): Promise<RAGResult> {
-  const model = "gemini-2.5-pro";
+// Function for Bias Monitor
+export const monitorForBias = async (
+  documentText: string
+): Promise<BiasAnalysisResult> => {
+  // FIX: Use gemini-2.5-pro for nuanced bias detection
+  const model = 'gemini-2.5-pro';
   const prompt = `
-    You are an expert AI legal research assistant. Your task is to analyze the provided legal document context and answer the user's question based *exclusively* on that context.
-    USER QUESTION: "${query}"
-    DOCUMENT CONTEXT:
-    ---
-    ${context}
-    ---
-    Format the final output as a valid JSON object matching the required schema.
-  `;
+      Analyze the following text for potential biases (e.g., gender, confirmation, racial, socioeconomic) or AI hallucinations (factually incorrect statements presented as fact).
+  
+      Text to Analyze:
+      ---
+      ${documentText}
+      ---
+  
+      Provide the analysis as a JSON object inside a markdown block. The structure should be:
+      {
+        "has_bias": false,
+        "findings": [
+          {
+            "phrase": "The exact phrase or sentence that is problematic.",
+            "bias_type": "The type of bias (e.g., 'Gender Bias', 'Confirmation Bias', 'Potential Hallucination').",
+            "explanation": "A brief explanation of why this phrase is flagged.",
+            "suggestion": "A suggestion for a more neutral rephrasing."
+          }
+        ]
+      }
+  
+      If no biases are found, "has_bias" should be false and "findings" should be an empty array.
+    `;
+  // FIX: Use standard generateContent and parse the JSON response
+  const response = await ai.models.generateContent({ model, contents: prompt });
+  return parseJsonFromMarkdown<BiasAnalysisResult>(response.text);
+};
 
-  try {
-    const response = await ai.models.generateContent({
-      model,
-      contents: prompt,
-      config: {
-        responseMimeType: "application/json",
-        responseSchema: ragSchema,
-        temperature: 0.2,
-      },
-    });
-    const jsonText = response.text.trim();
-    if (!jsonText) {
-      // For this specific use case, return a default value instead of throwing an error
-      return { answer: "No specific precedents found in the provided context for the query.", citations: ["The RAG model could not extract direct citations based on the input."] };
-    }
-    return JSON.parse(jsonText) as RAGResult;
-  } catch (error) {
-    console.error("Error in Gemini RAG search:", error);
-    // For this specific use case, return a default value instead of throwing an error
-    return { answer: "An error occurred during the RAG search.", citations: ["The model failed to produce a valid response."] };
-  }
-}
-
-export async function getPrecedentAnalysis(context: string): Promise<PrecedentAnalysisResult> {
-    const model = "gemini-2.5-pro";
-    const prompt = `
-        You are an expert AI judicial assistant. Your task is to perform a comprehensive analysis of the provided case context and structure your findings in a precise JSON format.
-
-        1.  **Summarize Key Arguments**: Distill the core legal arguments from both the plaintiff and defendant.
-        2.  **Identify Influencing Statutes**: Pinpoint the top 3 statutes or key precedents from the context that are most influential. For each one, provide a clear, direct quote and a brief explanation of its relevance.
-        3.  **Check for Logical Consistency**: Analyze the arguments. Identify any potential gaps in legal reasoning or failures to address a critical point.
-        4.  **Detect Potential Bias**: Scrutinize the language for any indication of implicit bias. If detected, issue a concise warning.
-
-        CASE CONTEXT:
-        ---
-        ${context}
-        ---
-
-        Your response MUST be a valid JSON object matching the required schema.
+// Function for Legal Draft Generator
+export const generateLegalDraft = async (
+  draftType: LegalDraftType,
+  caseContext: string,
+  keyPoints: string
+): Promise<string> => {
+  // FIX: Use gemini-2.5-pro for high-quality text generation
+  const model = 'gemini-2.5-pro';
+  const prompt = `
+      Generate a professional legal draft for a "${draftType}" based on Indian legal standards.
+  
+      Case Context:
+      ---
+      ${caseContext}
+      ---
+  
+      Key Points to Include:
+      ---
+      ${keyPoints}
+      ---
+      
+      Please generate the full text of the ${draftType}. Ensure it is well-structured, uses appropriate legal terminology, and incorporates all the key points provided. Do not wrap the output in markdown or JSON, just provide the raw text of the draft.
     `;
 
-    try {
-        const response = await ai.models.generateContent({
-            model,
-            contents: prompt,
-            config: {
-                responseMimeType: "application/json",
-                responseSchema: precedentAnalysisSchema,
-                temperature: 0.3,
-            },
-        });
-        const jsonText = response.text.trim();
-        return JSON.parse(jsonText) as PrecedentAnalysisResult;
-    } catch (error) {
-        console.error("Error in Gemini precedent analysis:", error);
-        throw new Error("Failed to get a valid precedent analysis from the AI model.");
-    }
-}
+  // FIX: Use generateContent and return the text property
+  const response = await ai.models.generateContent({ model, contents: prompt });
+  return response.text;
+};
 
-
-export function createChatSession(): Chat {
-  const chat = ai.chats.create({
-    model: 'gemini-2.5-flash',
+// Function for Chatbot
+export const createChatSession = (systemInstruction?: string): Chat => {
+  const model = 'gemini-2.5-flash';
+  return ai.chats.create({
+    model,
     config: {
-      systemInstruction: 'You are a helpful legal assistant. You can answer general legal questions, but you must state that you are not a lawyer and the user should consult with a qualified professional for legal advice.',
+      systemInstruction: systemInstruction || "You are a helpful legal assistant chatbot for the AI Justice Hub. Your goal is to provide general legal information and guidance based on Indian law. Do not provide legal advice. If a user asks for legal advice, you must tell them to consult with a qualified lawyer.",
     },
   });
-  return chat;
-}
+};

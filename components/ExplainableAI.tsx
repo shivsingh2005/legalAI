@@ -54,8 +54,8 @@ export const ExplainableAI: React.FC = () => {
   }, [documentText]);
 
   return (
-    <div className="bg-[rgb(var(--card))] p-6 rounded-lg shadow-md h-full flex flex-col">
-      <h2 className="text-xl font-semibold mb-4 text-[rgb(var(--card-foreground))]">Explainable AI: Precedent Analysis</h2>
+    <div className="h-full flex flex-col">
+      <h2 className="text-xl font-semibold mb-4 text-[rgb(var(--card-foreground))]">Precedent Analysis</h2>
       
       <div className="flex-shrink-0 border-b border-[rgb(var(--border))] pb-4 mb-4">
         <div className="grid sm:grid-cols-2 gap-4 items-center">

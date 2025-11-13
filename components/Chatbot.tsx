@@ -1,106 +1,127 @@
-
-import React, { useState, useRef, useEffect, useCallback } from 'react';
-import type { ChatMessage } from '../types';
+import React, { useState, useEffect, useRef } from 'react';
 import { createChatSession } from '../services/geminiService';
-import { PaperPlaneIcon } from './icons/PaperPlaneIcon';
-import { CloseIcon } from './icons/CloseIcon';
-import { Spinner } from './Spinner';
 import type { Chat } from '@google/genai';
-
+import type { GeneralChatMessage } from '../types';
+import { Spinner } from './Spinner';
+import { CloseIcon } from './icons/CloseIcon';
+import { PaperPlaneIcon } from './icons/PaperPlaneIcon';
 
 interface ChatbotProps {
-  onClose: () => void;
+    onClose: () => void;
+    caseContext?: string;
 }
 
-export const Chatbot: React.FC<ChatbotProps> = ({ onClose }) => {
-  const [messages, setMessages] = useState<ChatMessage[]>([
-    { sender: 'bot', text: 'Hello! How can I help you with your general legal questions today?' }
-  ]);
-  const [input, setInput] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const chatSessionRef = useRef<Chat | null>(null);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+export const Chatbot: React.FC<ChatbotProps> = ({ onClose, caseContext }) => {
+    const [messages, setMessages] = useState<GeneralChatMessage[]>([]);
+    const [input, setInput] = useState('');
+    const [chat, setChat] = useState<Chat | null>(null);
+    const [isLoading, setIsLoading] = useState(false);
+    const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    chatSessionRef.current = createChatSession();
-  }, []);
+    const scrollToBottom = () => {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    };
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
+    useEffect(() => {
+        scrollToBottom();
+    }, [messages]);
 
-  useEffect(scrollToBottom, [messages]);
+    useEffect(() => {
+        const systemInstruction = caseContext
+            ? `You are an AI Case Assistant. Your role is to help the user with their legal case. You have been provided with the initial summary of their case for context. You should answer questions about their case, explain related legal terms and procedures, and provide general guidance. However, you must not provide legal advice. Always remind the user to consult their assigned advocate for official legal advice. Here is the case summary: \n\n---${caseContext}---\n\n`
+            : "You are a helpful legal assistant chatbot for the AI Justice Hub. Your goal is to provide general legal information and guidance based on Indian law. You can help users understand legal terms, processes, and even assist them in describing their case for submission. Do not provide legal advice. If a user asks for legal advice, you must tell them to consult with a qualified lawyer.";
+        
+        const chatSession = createChatSession(systemInstruction);
+        setChat(chatSession);
 
-  const handleSend = useCallback(async () => {
-    if (!input.trim() || isLoading || !chatSessionRef.current) return;
-    
-    const userMessage: ChatMessage = { sender: 'user', text: input };
-    setMessages(prev => [...prev, userMessage]);
-    setInput('');
-    setIsLoading(true);
+        const welcomeMessage = caseContext
+            ? "Hello! I'm your AI Case Assistant. How can I help you with the case you just filed?"
+            : "Hello! I'm the Legal AI Assistant. I can help you understand legal terms or describe your issue. How can I assist you today?";
 
-    try {
-      const chat = chatSessionRef.current;
-      const result = await chat.sendMessage({ message: input });
-      const botMessage: ChatMessage = { sender: 'bot', text: result.text };
-      setMessages(prev => [...prev, botMessage]);
-    } catch (e) {
-      console.error(e);
-      const errorMessage: ChatMessage = { sender: 'bot', text: 'Sorry, I encountered an error. Please try again.' };
-      setMessages(prev => [...prev, errorMessage]);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [input, isLoading]);
+        setMessages([{ sender: 'bot', text: welcomeMessage }]);
+    }, [caseContext]);
 
-  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
-      handleSend();
-    }
-  };
-  
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 p-4">
-      <div className="bg-white rounded-lg shadow-2xl w-full max-w-md h-[70vh] flex flex-col">
-        <header className="flex justify-between items-center p-4 border-b">
-          <h3 className="font-bold text-lg text-gray-800">Legal Query Chatbot</h3>
-          <button onClick={onClose} className="text-gray-500 hover:text-gray-800">
-            <CloseIcon className="w-6 h-6" />
-          </button>
-        </header>
-        <div className="flex-1 p-4 overflow-y-auto bg-gray-50">
-          {messages.map((msg, index) => (
-            <div key={index} className={`flex mb-3 ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
-              <div className={`rounded-lg px-4 py-2 max-w-xs ${msg.sender === 'user' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-800'}`}>
-                {msg.text}
-              </div>
+    const handleSend = async () => {
+        if (!input.trim() || !chat) return;
+
+        const userMessage: GeneralChatMessage = { sender: 'user', text: input };
+        setMessages(prev => [...prev, userMessage]);
+        const currentInput = input;
+        setInput('');
+        setIsLoading(true);
+
+        try {
+            const stream = await chat.sendMessageStream({ message: currentInput });
+            let botResponse = '';
+            setMessages(prev => [...prev, { sender: 'bot', text: '' }]);
+            
+            for await (const chunk of stream) {
+                botResponse += chunk.text;
+                setMessages(prev => {
+                    const newMessages = [...prev];
+                    newMessages[newMessages.length - 1] = { sender: 'bot', text: botResponse };
+                    return newMessages;
+                });
+            }
+        } catch (error) {
+            console.error('Chat error:', error);
+            setMessages(prev => [...prev, { sender: 'bot', text: 'Sorry, I encountered an error. Please try again.' }]);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter' && !isLoading) {
+            handleSend();
+        }
+    };
+
+    return (
+        <div className="fixed bottom-8 right-8 w-full max-w-sm h-[calc(100%-4rem)] max-h-[600px] bg-[rgb(var(--card))] rounded-xl shadow-2xl flex flex-col z-50 border border-[rgb(var(--border))]">
+            {/* Header */}
+            <header className="flex justify-between items-center p-4 border-b border-[rgb(var(--border))] flex-shrink-0">
+                <h3 className="font-bold text-lg">{caseContext ? 'AI Case Assistant' : 'Legal AI Assistant'}</h3>
+                <button onClick={onClose} className="p-2 rounded-full text-[rgb(var(--muted-foreground))] hover:bg-[rgb(var(--muted))]">
+                    <CloseIcon className="w-6 h-6" />
+                </button>
+            </header>
+            
+            {/* Messages */}
+            <div className="flex-1 p-4 overflow-y-auto bg-[rgb(var(--background))]">
+                {messages.map((msg, index) => (
+                    <div key={index} className={`flex mb-3 ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
+                        <div className={`rounded-lg px-4 py-2 max-w-xs shadow-sm ${msg.sender === 'user' ? 'bg-[rgb(var(--primary))] text-[rgb(var(--primary-foreground))]' : 'bg-[rgb(var(--card))] border border-[rgb(var(--border))]'}`}>
+                            <p className="text-sm whitespace-pre-wrap">{msg.text}</p>
+                        </div>
+                    </div>
+                ))}
+                {isLoading && (
+                    <div className="flex justify-start">
+                        <div className="rounded-lg px-4 py-2 bg-[rgb(var(--card))] border border-[rgb(var(--border))] flex items-center shadow-sm">
+                            <Spinner />
+                        </div>
+                    </div>
+                )}
+                <div ref={messagesEndRef} />
             </div>
-          ))}
-          {isLoading && (
-            <div className="flex justify-start">
-              <div className="rounded-lg px-4 py-2 bg-gray-200 text-gray-800 flex items-center">
-                <Spinner />
-                <span className="ml-2">Typing...</span>
-              </div>
-            </div>
-          )}
-          <div ref={messagesEndRef} />
+
+            {/* Input */}
+            <footer className="p-4 border-t border-[rgb(var(--border))]">
+                <div className="flex items-center gap-2">
+                    <input
+                        type="text"
+                        value={input}
+                        onChange={(e) => setInput(e.target.value)}
+                        onKeyPress={handleKeyPress}
+                        placeholder="Ask a question..."
+                        className="flex-1 bg-[rgb(var(--muted))] border border-[rgb(var(--border))] rounded-full px-4 py-2 focus:ring-2 focus:ring-[rgb(var(--ring))] focus:outline-none"
+                    />
+                    <button onClick={handleSend} disabled={!input.trim() || isLoading} className="bg-[rgb(var(--primary))] text-white p-3 rounded-full hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed">
+                        <PaperPlaneIcon className="w-5 h-5" />
+                    </button>
+                </div>
+            </footer>
         </div>
-        <footer className="p-4 border-t flex items-center">
-          <input
-            type="text"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyPress={handleKeyPress}
-            placeholder="Ask a question..."
-            className="flex-1 border rounded-full px-4 py-2 focus:ring-2 focus:ring-blue-500"
-            disabled={isLoading}
-          />
-          <button onClick={handleSend} disabled={isLoading || !input.trim()} className="ml-3 bg-blue-600 text-white p-2 rounded-full hover:bg-blue-700 disabled:bg-gray-400">
-            <PaperPlaneIcon className="w-5 h-5" />
-          </button>
-        </footer>
-      </div>
-    </div>
-  );
+    );
 };

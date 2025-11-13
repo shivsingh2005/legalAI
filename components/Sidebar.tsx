@@ -1,5 +1,6 @@
 import React from 'react';
-import type { ViewType, UserRole } from '../App';
+// FIX: Import shared types from the centralized types.ts file.
+import type { ViewType, UserRole } from '../types';
 import { SearchIcon } from './icons/SearchIcon';
 import { BriefcaseIcon } from './icons/BriefcaseIcon';
 import { ChartBarIcon } from './icons/ChartBarIcon';
@@ -25,13 +26,12 @@ interface NavItemProps {
 const NavItem: React.FC<NavItemProps> = ({ view, label, icon, isActive, onClick }) => (
   <button
     onClick={() => onClick(view)}
-    className={`w-full flex items-center px-4 py-3 text-sm font-medium transition-colors duration-200 relative ${
+    className={`w-full flex items-center px-4 py-3 text-sm font-medium transition-all duration-200 relative rounded-md ${
       isActive
-        ? 'bg-slate-700 text-white'
-        : 'text-slate-400 hover:bg-slate-700 hover:text-white'
+        ? 'bg-[rgb(var(--primary))] text-white shadow-lg'
+        : 'text-slate-300 hover:bg-white/10 hover:text-white'
     }`}
   >
-    {isActive && <div className="absolute left-0 top-0 h-full w-1 bg-[rgb(var(--primary))] rounded-r-full"></div>}
     {icon}
     <span className="ml-3">{label}</span>
   </button>
@@ -82,11 +82,11 @@ export const Sidebar: React.FC<SidebarProps> = ({ userRole, activeView, setActiv
 
 
   return (
-    <div className="hidden lg:flex w-64 bg-slate-900 text-white flex-col">
-      <div className="flex items-center justify-center h-16 border-b border-slate-700">
+    <div className="hidden lg:flex w-64 bg-slate-900/[0.95] dark:bg-slate-900/[0.9] text-white flex-col p-4">
+      <div className="flex items-center justify-center h-16">
         <h2 className="text-xl font-bold tracking-wider text-white">AI Justice Hub</h2>
       </div>
-      <nav className="flex-1 mt-6 space-y-1">
+      <nav className="flex-1 mt-6 space-y-2">
         {navItems.map((item) => (
           <NavItem
             key={item.view}
@@ -98,7 +98,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ userRole, activeView, setActiv
           />
         ))}
       </nav>
-       <div className="p-4 border-t border-slate-700 text-center">
+       <div className="p-4 text-center">
             <p className="text-xs text-slate-400">DPDP Act 2023 Compliant</p>
         </div>
     </div>

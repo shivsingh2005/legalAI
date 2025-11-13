@@ -1,5 +1,10 @@
 import { Chat } from "@google/genai";
 
+// FIX: Add shared application types to centralize them.
+export type UserRole = 'citizen' | 'advocate' | 'judge';
+export type ViewType = 'dashboard' | 'search' | 'builder' | 'analytics' | 'workspace' | 'case_filing';
+export type Theme = 'light' | 'dark';
+
 export interface RAGResult {
   answer: string;
   citations: string[];
@@ -31,9 +36,17 @@ export interface CitizenAnalysisResult {
 }
 
 
-export interface ChatMessage {
+export interface GeneralChatMessage {
   sender: 'user' | 'bot';
   text: string;
+}
+
+export interface CaseChatMessage {
+  id: string;
+  caseId: string;
+  role: 'citizen' | 'advocate';
+  text: string;
+  timestamp: string;
 }
 
 // FIX: Add missing Lawyer interface for LawyerCard.tsx
@@ -131,4 +144,33 @@ export interface AIResearchPipelineResult {
   }[];
   final_summary: string;
   argument_suggestion: string;
+}
+
+// ADD-ON: AI Legal Draft Generator
+export type LegalDraftType = 'Affidavit' | 'Cease and Desist' | 'Legal Notice' | 'Vakalatnama';
+
+// ADD-ON: AI Bias Monitor
+export interface BiasAnalysisResult {
+    has_bias: boolean;
+    findings: {
+        phrase: string;
+        bias_type: string;
+        explanation: string;
+        suggestion: string;
+    }[];
+}
+
+// ADD-ON: Real-Time Notifications
+export interface AppNotification {
+    id: number;
+    icon: 'case' | 'draft' | 'system';
+    message: string;
+    timestamp: string;
+    read: boolean;
+}
+
+// ADD-ON: AI Chat Suggestions
+export interface NextStepsResponse {
+    suggestions: string[];
+    clarification_needed: string | null;
 }

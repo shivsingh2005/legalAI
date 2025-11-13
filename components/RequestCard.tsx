@@ -1,10 +1,12 @@
 import React from 'react';
 import type { CaseRequest } from '../types';
+import { ChatIcon } from './icons/ChatIcon';
 
 interface RequestCardProps {
     request: CaseRequest;
     onAccept?: () => void;
     onReject?: () => void;
+    onOpenChat?: (caseId: string) => void;
 }
 
 const StatusBadge: React.FC<{ status: CaseRequest['status'] }> = ({ status }) => {
@@ -35,7 +37,7 @@ const UrgencyBadge: React.FC<{ urgency: CaseRequest['urgency'] }> = ({ urgency }
     }
 }
 
-export const RequestCard: React.FC<RequestCardProps> = ({ request, onAccept, onReject }) => {
+export const RequestCard: React.FC<RequestCardProps> = ({ request, onAccept, onReject, onOpenChat }) => {
     const timeAgo = (dateString: string) => {
         const date = new Date(dateString);
         const seconds = Math.floor((new Date().getTime() - date.getTime()) / 1000);
@@ -52,14 +54,22 @@ export const RequestCard: React.FC<RequestCardProps> = ({ request, onAccept, onR
         return Math.floor(seconds) + " seconds ago";
     };
 
+    const isClickable = request.status === 'Accepted' && onOpenChat;
+
     return (
-        <div className="bg-[rgb(var(--card))] border border-[rgb(var(--border))] rounded-lg shadow-sm p-4 transition-shadow hover:shadow-md">
+        <div 
+            onClick={isClickable ? () => onOpenChat(request.id) : undefined}
+            className={`bg-[rgb(var(--card))] border border-[rgb(var(--border))] rounded-lg shadow-sm p-4 transition-all ${isClickable ? 'hover:shadow-md hover:border-[rgb(var(--primary))] cursor-pointer' : ''}`}
+        >
             <div className="flex justify-between items-start">
                 <div>
                     <h3 className="font-bold text-[rgb(var(--card-foreground))]">{request.userName}</h3>
                     <p className="text-xs text-[rgb(var(--muted-foreground))]">Received {timeAgo(request.timestamp)}</p>
                 </div>
-                <StatusBadge status={request.status} />
+                <div className="flex items-center gap-2">
+                    {isClickable && <ChatIcon className="w-5 h-5 text-[rgb(var(--primary))]"/>}
+                    <StatusBadge status={request.status} />
+                </div>
             </div>
             <p className="text-sm text-[rgb(var(--foreground))] my-3 p-3 bg-[rgb(var(--muted))] rounded-md">{request.caseSummary}</p>
 

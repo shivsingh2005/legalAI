@@ -35,9 +35,9 @@ export const DisputeInputForm: React.FC<DisputeInputFormProps> = ({ onAnalyze, i
   };
 
   return (
-    <div className="bg-[rgb(var(--card))] p-6 rounded-lg shadow-lg mb-8">
-      <h2 className="text-2xl font-semibold mb-4 text-[rgb(var(--card-foreground))]">Describe Your Case</h2>
-      <p className="text-[rgb(var(--muted-foreground))] mb-4">
+    <div className="bg-[rgb(var(--card))] p-6 rounded-xl shadow-custom-lg border border-[rgb(var(--border))] mb-8">
+      <h2 className="text-2xl font-semibold mb-2 text-[rgb(var(--card-foreground))]">Describe Your Case</h2>
+      <p className="text-[rgb(var(--muted-foreground))] mb-6">
         Provide details about your legal dispute below. You can either type directly into the text box or upload a plain text (.txt) file. The more detail you provide, the more accurate the AI analysis will be.
       </p>
       <form onSubmit={handleSubmit}>
@@ -58,13 +58,13 @@ export const DisputeInputForm: React.FC<DisputeInputFormProps> = ({ onAnalyze, i
           <button
             type="submit"
             disabled={isLoading || !disputeText}
-            className="w-full sm:w-auto px-6 py-3 bg-[rgb(var(--primary))] text-[rgb(var(--primary-foreground))] font-semibold rounded-md hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
+            className="w-full sm:w-auto px-6 py-3 bg-gradient-to-r from-[rgb(var(--primary))] to-[rgb(var(--accent))] text-[rgb(var(--primary-foreground))] font-semibold rounded-md hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 transform hover:scale-105 shadow-md hover:shadow-lg flex items-center justify-center gap-2"
           >
             {isLoading ? <><Spinner /> Analyzing...</> : 'Analyze Case'}
           </button>
         </div>
       </form>
-      <p className="text-xs text-[rgb(var(--muted-foreground))] mt-4 text-center">
+      <p className="text-xs text-[rgb(var(--muted-foreground))] mt-6 text-center">
         <strong>Data Privacy Notice:</strong> By submitting your case, you agree to have the data analyzed by an AI model. Please do not include sensitive personal identifiable information. We are compliant with the DPDP Act 2023.
       </p>
     </div>
